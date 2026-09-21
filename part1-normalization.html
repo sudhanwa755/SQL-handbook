@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Database Normalization (1NF, 2NF, 3NF) — HSQLDB Handbook</title>
+<meta name="description" content="Learn database normalization from scratch. Understand 1NF, 2NF, 3NF with clear examples, result tables, and how to identify which normal form a table is in." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-content">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <a href="index.html" class="crumb">Home</a>
+      <span class="sep">›</span>
+      <span class="crumb">Part 1 — Theory</span>
+      <span class="sep">›</span>
+      <span class="crumb-current">Normalization</span>
+    </div>
+    <div class="topbar-actions">
+      <a href="part2-keys-constraints.html" class="btn btn-primary">Next Chapter →</a>
+    </div>
+  </header>
+
+  <div class="content-area">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="part-badge">📐 Part 1 · Chapter 1</div>
+      <h1 class="page-title">Database Normalization</h1>
+      <p class="page-subtitle">
+        Normalization is the process of organizing a database to eliminate <strong>redundancy</strong> and 
+        <strong>data anomalies</strong>. You will learn to identify whether a table is in 1NF, 2NF, or 3NF — 
+        and exactly how to fix it.
+      </p>
+      <div class="page-meta">
+        <div class="meta-item"><span class="meta-icon">⏱</span> ~20 min read</div>
+        <div class="meta-item"><span class="meta-icon">🎯</span> Beginner</div>
+        <div class="meta-item"><span class="meta-icon">📋</span> 5 sections</div>
+      </div>
+    </div>
+
+    <!-- SECTION 0: WHY NORMALIZE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="why"></span>
+      <div class="section-header">
+        <div class="section-num">0</div>
+        <h2>Why Normalize a Database?</h2>
+      </div>
+
+      <p>Without normalization, databases suffer from three classic <strong>anomalies</strong>:</p>
+
+      <div class="concept-grid">
+        <div class="concept-card">
+          <div class="card-icon">✏️</div>
+          <div class="card-title">Update Anomaly</div>
+          <div class="card-desc">Same data stored in multiple rows. Updating one row leaves others stale — causing inconsistency.</div>
+        </div>
+        <div class="concept-card">
+          <div class="card-icon">➕</div>
+          <div class="card-title">Insertion Anomaly</div>
+          <div class="card-desc">Cannot add new data without inserting unrelated or fake data to fill required columns.</div>
+        </div>
+        <div class="concept-card">
+          <div class="card-icon">🗑️</div>
+          <div class="card-title">Deletion Anomaly</div>
+          <div class="card-desc">Deleting one record accidentally destroys other important related data.</div>
+        </div>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Key Rule</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">
+          Each Normal Form (NF) builds on top of the previous one. A table in <strong>3NF is also in 2NF and 1NF</strong>. 
+          You cannot skip a form.
+        </p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 1: 1NF -->
+    <div class="topic-section">
+      <span class="section-anchor" id="1nf"></span>
+      <div class="section-header">
+        <div class="section-num">1.1</div>
+        <h2>First Normal Form (1NF)</h2>
+      </div>
+
+      <p><strong>A table is in 1NF if:</strong></p>
+      <ul class="styled-list">
+        <li>Every column contains <strong>atomic (indivisible) values</strong> — no lists, no sets.</li>
+        <li>Every column contains values of a <strong>single type</strong>.</li>
+        <li>Each column has a <strong>unique name</strong>.</li>
+        <li>The order of rows does <strong>not matter</strong>.</li>
+      </ul>
+
+      <h3>❌ Table That Violates 1NF</h3>
+      <p>Here is a <code>STUDENT_COURSES</code> table. The <code>Courses</code> column stores multiple values — this breaks 1NF.</p>
+
+      <div class="result-label">Table: STUDENT_COURSES (BAD — Violates 1NF)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>StudentID</th><th>StudentName</th><th>Courses ❌</th></tr></thead>
+          <tbody>
+            <tr><td>101</td><td>Alice</td><td class="highlight-val">Math, Science, English</td></tr>
+            <tr><td>102</td><td>Bob</td><td class="highlight-val">Math, History</td></tr>
+            <tr><td>103</td><td>Carol</td><td class="highlight-val">English</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The <code>Courses</code> column has multiple values. This makes querying, filtering, and joining impossible cleanly.</p>
+
+      <h3>✅ Converting to 1NF</h3>
+      <p>Split the multi-valued column into separate rows, one course per row:</p>
+
+      <div class="result-label">Table: STUDENT_COURSES (FIXED — In 1NF)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>StudentID</th><th>StudentName</th><th>Course ✅</th></tr></thead>
+          <tbody>
+            <tr><td>101</td><td>Alice</td><td>Math</td></tr>
+            <tr><td>101</td><td>Alice</td><td>Science</td></tr>
+            <tr><td>101</td><td>Alice</td><td>English</td></tr>
+            <tr><td>102</td><td>Bob</td><td>Math</td></tr>
+            <tr><td>102</td><td>Bob</td><td>History</td></tr>
+            <tr><td>103</td><td>Carol</td><td>English</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Key Points — 1NF</div>
+        <ul>
+          <li>No repeating groups or arrays in any column.</li>
+          <li>Each cell must hold exactly ONE value.</li>
+          <li>The primary key can be composite (StudentID + Course) if needed.</li>
+        </ul>
+      </div>
+
+      <div class="info-box mistakes">
+        <div class="info-title">⚠️ Mistakes to Avoid</div>
+        <ul>
+          <li>Storing comma-separated lists like <code>"Math,Science"</code> in one cell — this breaks 1NF.</li>
+          <li>Using columns like <code>Course1</code>, <code>Course2</code>, <code>Course3</code> — this is a <em>repeating group</em> and also violates 1NF.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 2: 2NF -->
+    <div class="topic-section">
+      <span class="section-anchor" id="2nf"></span>
+      <div class="section-header">
+        <div class="section-num">1.2</div>
+        <h2>Second Normal Form (2NF)</h2>
+      </div>
+
+      <p><strong>A table is in 2NF if:</strong></p>
+      <ul class="styled-list">
+        <li>It is already in <strong>1NF</strong>.</li>
+        <li>Every <strong>non-key column</strong> is <strong>fully functionally dependent</strong> on the entire primary key — not just part of it.</li>
+      </ul>
+
+      <div class="info-box note">
+        <div class="info-title">📘 Note</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">
+          2NF only applies when the primary key is <strong>composite</strong> (two or more columns). 
+          If the primary key is a single column, then 2NF is automatically satisfied once 1NF is achieved.
+        </p>
+      </div>
+
+      <h3>❌ Table That Violates 2NF</h3>
+      <p>
+        The table below has a composite key: <code>(StudentID, CourseID)</code>.<br/>
+        <code>StudentName</code> depends only on <code>StudentID</code> — not on <code>CourseID</code>. This is a <strong>partial dependency</strong> → violates 2NF.
+      </p>
+
+      <div class="result-label">Table: ENROLLMENT (BAD — Violates 2NF)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>StudentID 🔑</th><th>CourseID 🔑</th><th>StudentName ❌</th><th>CourseName ❌</th><th>Grade ✅</th></tr></thead>
+          <tbody>
+            <tr><td>101</td><td>C01</td><td class="highlight-val">Alice</td><td class="highlight-val">Math</td><td>A</td></tr>
+            <tr><td>101</td><td>C02</td><td class="highlight-val">Alice</td><td class="highlight-val">Science</td><td>B</td></tr>
+            <tr><td>102</td><td>C01</td><td class="highlight-val">Bob</td><td class="highlight-val">Math</td><td>C</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Notice <code>Alice</code> is repeated — that's the update anomaly. Changing Alice's name needs to update every row.</p>
+
+      <h3>✅ Converting to 2NF — Split into 3 tables</h3>
+
+      <div class="result-label">Table: STUDENTS</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>StudentID 🔑</th><th>StudentName</th></tr></thead>
+          <tbody>
+            <tr><td>101</td><td>Alice</td></tr>
+            <tr><td>102</td><td>Bob</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="result-label">Table: COURSES</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>CourseID 🔑</th><th>CourseName</th></tr></thead>
+          <tbody>
+            <tr><td>C01</td><td>Math</td></tr>
+            <tr><td>C02</td><td>Science</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="result-label">Table: ENROLLMENT (Grade only — depends on both keys)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>StudentID 🔑</th><th>CourseID 🔑</th><th>Grade ✅</th></tr></thead>
+          <tbody>
+            <tr><td>101</td><td>C01</td><td>A</td></tr>
+            <tr><td>101</td><td>C02</td><td>B</td></tr>
+            <tr><td>102</td><td>C01</td><td>C</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Key Points — 2NF</div>
+        <ul>
+          <li>Look for partial dependencies: can a non-key column be determined by just PART of the composite key?</li>
+          <li>If yes — move that column to a new table where the partial key becomes the primary key.</li>
+          <li>Only columns that depend on the FULL composite key stay in the original table.</li>
+        </ul>
+      </div>
+
+      <div class="info-box mistakes">
+        <div class="info-title">⚠️ Mistakes to Avoid</div>
+        <ul>
+          <li>Thinking 2NF applies to tables with a single-column primary key — it doesn't matter then.</li>
+          <li>Confusing partial dependency with transitive dependency (that's 3NF).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 3: 3NF -->
+    <div class="topic-section">
+      <span class="section-anchor" id="3nf"></span>
+      <div class="section-header">
+        <div class="section-num">1.3</div>
+        <h2>Third Normal Form (3NF)</h2>
+      </div>
+
+      <p><strong>A table is in 3NF if:</strong></p>
+      <ul class="styled-list">
+        <li>It is already in <strong>2NF</strong>.</li>
+        <li>No non-key column is <strong>transitively dependent</strong> on the primary key.</li>
+      </ul>
+
+      <div class="info-box note">
+        <div class="info-title">📘 Transitive Dependency Explained</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">
+          If <strong>A → B</strong> and <strong>B → C</strong>, then <strong>A → C</strong> transitively.<br/>
+          If A is the primary key and C depends on B (not directly on A), that's a <strong>transitive dependency</strong> — it violates 3NF.
+        </p>
+      </div>
+
+      <h3>❌ Table That Violates 3NF</h3>
+
+      <div class="result-label">Table: EMPLOYEES (BAD — Violates 3NF)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID 🔑</th><th>EmpName</th><th>DeptID</th><th>DeptName ❌</th><th>DeptCity ❌</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td><td>D10</td><td class="highlight-val">Engineering</td><td class="highlight-val">Mumbai</td></tr>
+            <tr><td>E02</td><td>Bob</td><td>D10</td><td class="highlight-val">Engineering</td><td class="highlight-val">Mumbai</td></tr>
+            <tr><td>E03</td><td>Carol</td><td>D20</td><td class="highlight-val">Marketing</td><td class="highlight-val">Delhi</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Here: <code>EmpID → DeptID</code> and <code>DeptID → DeptName, DeptCity</code>.<br/>
+        So <code>EmpID → DeptName</code> is <strong>transitive</strong>. <code>DeptName</code> and <code>DeptCity</code> do not directly depend on <code>EmpID</code>.
+      </p>
+
+      <h3>✅ Converting to 3NF — Split into 2 tables</h3>
+
+      <div class="result-label">Table: EMPLOYEES (3NF ✅)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID 🔑</th><th>EmpName</th><th>DeptID</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td><td>D10</td></tr>
+            <tr><td>E02</td><td>Bob</td><td>D10</td></tr>
+            <tr><td>E03</td><td>Carol</td><td>D20</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="result-label">Table: DEPARTMENTS (3NF ✅)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>DeptID 🔑</th><th>DeptName</th><th>DeptCity</th></tr></thead>
+          <tbody>
+            <tr><td>D10</td><td>Engineering</td><td>Mumbai</td></tr>
+            <tr><td>D20</td><td>Marketing</td><td>Delhi</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Key Points — 3NF</div>
+        <ul>
+          <li>Every non-key column must depend ONLY on the primary key — "the key, the whole key, and nothing but the key."</li>
+          <li>If column C depends on column B, and B is not a key — move B and C to a new table.</li>
+          <li>3NF eliminates most data redundancy issues in practice.</li>
+        </ul>
+      </div>
+
+      <div class="info-box mistakes">
+        <div class="info-title">⚠️ Mistakes to Avoid</div>
+        <ul>
+          <li>Confusing transitive dependency with partial dependency — they are different problems.</li>
+          <li>Forgetting to also remove the transitively-dependent columns from the original table.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SECTION 4: HOW TO IDENTIFY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="identify"></span>
+      <div class="section-header">
+        <div class="section-num">1.4</div>
+        <h2>How to Identify Which NF a Table Is In</h2>
+      </div>
+
+      <p>Use this checklist in order:</p>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content"><strong>Check 1NF:</strong> Does any column store multiple values in a single cell? If YES → table is <strong>NOT even in 1NF</strong>. Fix it first.</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content"><strong>Check 2NF:</strong> Is the primary key composite? If YES → do any non-key columns depend on only PART of that composite key? If YES → table is in <strong>1NF but NOT 2NF</strong>.</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content"><strong>Check 3NF:</strong> Does any non-key column depend on another non-key column? If YES → table is in <strong>2NF but NOT 3NF</strong>.</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-content">If all checks pass → the table is in <strong>3NF ✅</strong>.</div>
+        </div>
+      </div>
+
+      <h3>Summary Comparison</h3>
+      <table class="compare-table">
+        <thead>
+          <tr><th>Normal Form</th><th>What It Eliminates</th><th>Rule</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-gold">1NF</span></td>
+            <td>Multi-valued cells, repeating groups</td>
+            <td>All values must be atomic</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-green">2NF</span></td>
+            <td>Partial dependencies</td>
+            <td>Non-key columns depend on full composite key</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-violet">3NF</span></td>
+            <td>Transitive dependencies</td>
+            <td>Non-key columns depend ONLY on the primary key</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /content-area -->
+
+  <div class="page-nav-footer">
+    <a href="index.html" class="nav-link-card">
+      <div class="nlc-arrow">←</div>
+      <div>
+        <div class="nlc-label">Home</div>
+        <div class="nlc-title">Table of Contents</div>
+      </div>
+    </a>
+    <a href="part2-keys-constraints.html" class="nav-link-card next">
+      <div class="nlc-arrow">→</div>
+      <div>
+        <div class="nlc-label">Chapter 2</div>
+        <div class="nlc-title">Keys & Constraints</div>
+      </div>
+    </a>
+  </div>
+
+</div><!-- /main-content -->
+
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script src="nav.js"></script>
+<script>buildSidebar('part1-normalization.html');</script>
+</body>
+</html>

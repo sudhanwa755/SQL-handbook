@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>All Joins, Self Join & Set Operations — HSQLDB Handbook</title>
+<meta name="description" content="Master all SQL join types: INNER, LEFT, RIGHT, FULL OUTER, CROSS, SELF joins with clear examples and result tables. Plus UNION, UNION ALL, INTERSECT, EXCEPT set operations." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-content">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <a href="index.html" class="crumb">Home</a>
+      <span class="sep">›</span>
+      <span class="crumb">Part 4</span>
+      <span class="sep">›</span>
+      <span class="crumb-current">Joins & Multi-Table</span>
+    </div>
+    <div class="topbar-actions">
+      <a href="part8-subqueries-sets.html" class="btn btn-primary">Next Chapter →</a>
+    </div>
+  </header>
+
+  <div class="content-area">
+
+    <div class="page-header">
+      <div class="part-badge">🔗 Part 4 · Chapter 7</div>
+      <h1 class="page-title">Joins & Multi-Table Queries</h1>
+      <p class="page-subtitle">
+        Joins are the superpower of relational databases — combining data from multiple tables into one result. 
+        Master all join types, self joins, multi-table joins, and set operations to unlock the full potential of SQL.
+      </p>
+      <div class="page-meta">
+        <div class="meta-item"><span class="meta-icon">⏱</span> ~40 min read</div>
+        <div class="meta-item"><span class="meta-icon">🎯</span> Intermediate–Advanced</div>
+        <div class="meta-item"><span class="meta-icon">📋</span> 12 sections</div>
+      </div>
+    </div>
+
+    <!-- SAMPLE DATA -->
+    <div class="topic-section">
+      <div class="section-header">
+        <div class="section-num">⬛</div>
+        <h2>Sample Database for This Chapter</h2>
+      </div>
+      <p>We'll use three related tables. Study their structure before proceeding.</p>
+
+      <div class="result-label">Table: DEPARTMENTS</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>DeptID</th><th>DeptName</th><th>ManagerID</th></tr></thead>
+          <tbody>
+            <tr><td>D10</td><td>IT</td><td>E03</td></tr>
+            <tr><td>D20</td><td>HR</td><td>E05</td></tr>
+            <tr><td>D30</td><td>Finance</td><td>E06</td></tr>
+            <tr><td>D40</td><td>Marketing</td><td class="null-val">NULL</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="result-label">Table: EMPLOYEES</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th><th>DeptID</th><th>Salary</th><th>ManagerID</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td><td>D10</td><td>85000</td><td>E03</td></tr>
+            <tr><td>E02</td><td>Bob</td><td>D20</td><td>55000</td><td>E05</td></tr>
+            <tr><td>E03</td><td>Carol</td><td>D10</td><td>92000</td><td class="null-val">NULL</td></tr>
+            <tr><td>E04</td><td>David</td><td>D30</td><td>78000</td><td>E06</td></tr>
+            <tr><td>E05</td><td>Eva</td><td>D20</td><td>62000</td><td class="null-val">NULL</td></tr>
+            <tr><td>E06</td><td>Frank</td><td>D30</td><td>95000</td><td class="null-val">NULL</td></tr>
+            <tr><td>E07</td><td>Grace</td><td class="null-val">NULL</td><td>70000</td><td>E03</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="result-label">Table: PROJECTS</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>ProjectID</th><th>ProjectName</th><th>DeptID</th><th>Budget</th></tr></thead>
+          <tbody>
+            <tr><td>P01</td><td>Website Redesign</td><td>D10</td><td>500000</td></tr>
+            <tr><td>P02</td><td>HR Portal</td><td>D20</td><td>200000</td></tr>
+            <tr><td>P03</td><td>Audit System</td><td>D30</td><td>350000</td></tr>
+            <tr><td>P04</td><td>AI Dashboard</td><td>D10</td><td>800000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- INNER JOIN -->
+    <div class="topic-section">
+      <span class="section-anchor" id="inner-join"></span>
+      <div class="section-header">
+        <div class="section-num">7.1</div>
+        <h2>INNER JOIN — Matching Rows Only</h2>
+      </div>
+      <p><strong>What it returns:</strong> Only rows where the join condition matches in <em>both</em> tables. Non-matching rows from either table are excluded.</p>
+
+      <div class="join-diagram">
+        <div class="circle circle-a">EMPLOYEES<br/>(Left)</div>
+        <div class="circle-overlap" style="font-size:9px; width:50px; height:50px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:rgba(245,200,66,0.3); border:2px solid rgba(245,200,66,0.6); color:var(--accent-gold); font-weight:800; position:relative; z-index:10;">INNER</div>
+        <div class="circle circle-b">DEPARTMENTS<br/>(Right)</div>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — INNER JOIN</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span>
+    <span class="tbl">e</span>.<span class="col">EmpID</span>,
+    <span class="tbl">e</span>.<span class="col">EmpName</span>,
+    <span class="tbl">d</span>.<span class="col">DeptName</span>,
+    <span class="tbl">e</span>.<span class="col">Salary</span>
+<span class="kw">FROM</span>       <span class="tbl">EMPLOYEES</span>   <span class="tbl">e</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>  <span class="kw">ON</span>  <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: INNER JOIN (Grace excluded — no DeptID; Marketing excluded — no employees)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th><th>DeptName</th><th>Salary</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td><td>IT</td><td>85000</td></tr>
+            <tr><td>E02</td><td>Bob</td><td>HR</td><td>55000</td></tr>
+            <tr><td>E03</td><td>Carol</td><td>IT</td><td>92000</td></tr>
+            <tr><td>E04</td><td>David</td><td>Finance</td><td>78000</td></tr>
+            <tr><td>E05</td><td>Eva</td><td>HR</td><td>62000</td></tr>
+            <tr><td>E06</td><td>Frank</td><td>Finance</td><td>95000</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box note">
+        <div class="info-title">📘 Note</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">Grace (E07) has <code>DeptID = NULL</code> — NULL never matches anything, so she's excluded. Marketing (D40) has no employees — also excluded.</p>
+      </div>
+    </div>
+
+    <!-- LEFT JOIN -->
+    <div class="topic-section">
+      <span class="section-anchor" id="left-join"></span>
+      <div class="section-header">
+        <div class="section-num">7.2</div>
+        <h2>LEFT JOIN (LEFT OUTER JOIN)</h2>
+      </div>
+      <p><strong>What it returns:</strong> All rows from the <em>left</em> table, plus matching rows from the right table. Where there's no match, right table columns are NULL.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — LEFT JOIN</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- All employees, even those without a department</span>
+<span class="kw">SELECT</span>
+    <span class="tbl">e</span>.<span class="col">EmpID</span>,
+    <span class="tbl">e</span>.<span class="col">EmpName</span>,
+    <span class="fn">COALESCE</span>(<span class="tbl">d</span>.<span class="col">DeptName</span>, <span class="str">'No Department'</span>) <span class="kw">AS</span> DeptName,
+    <span class="tbl">e</span>.<span class="col">Salary</span>
+<span class="kw">FROM</span>      <span class="tbl">EMPLOYEES</span>   <span class="tbl">e</span>
+<span class="kw">LEFT JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>  <span class="kw">ON</span>  <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: LEFT JOIN (Grace is now included with NULL DeptName)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th><th>DeptName</th><th>Salary</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td><td>IT</td><td>85000</td></tr>
+            <tr><td>E02</td><td>Bob</td><td>HR</td><td>55000</td></tr>
+            <tr><td>E03</td><td>Carol</td><td>IT</td><td>92000</td></tr>
+            <tr><td>E04</td><td>David</td><td>Finance</td><td>78000</td></tr>
+            <tr><td>E05</td><td>Eva</td><td>HR</td><td>62000</td></tr>
+            <tr><td>E06</td><td>Frank</td><td>Finance</td><td>95000</td></tr>
+            <tr><td class="highlight-val">E07</td><td class="highlight-val">Grace</td><td class="highlight-val">No Department</td><td class="highlight-val">70000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT JOIN -->
+    <div class="topic-section">
+      <span class="section-anchor" id="right-join"></span>
+      <div class="section-header">
+        <div class="section-num">7.3</div>
+        <h2>RIGHT JOIN (RIGHT OUTER JOIN)</h2>
+      </div>
+      <p><strong>What it returns:</strong> All rows from the <em>right</em> table, plus matching rows from the left. Where there's no match, left table columns are NULL.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — RIGHT JOIN</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- All departments, even those with no employees</span>
+<span class="kw">SELECT</span>
+    <span class="tbl">e</span>.<span class="col">EmpID</span>,
+    <span class="tbl">e</span>.<span class="col">EmpName</span>,
+    <span class="tbl">d</span>.<span class="col">DeptName</span>
+<span class="kw">FROM</span>       <span class="tbl">EMPLOYEES</span>   <span class="tbl">e</span>
+<span class="kw">RIGHT JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>  <span class="kw">ON</span>  <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: Marketing appears with NULL employee columns</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th><th>DeptName</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td><td>IT</td></tr>
+            <tr><td>E03</td><td>Carol</td><td>IT</td></tr>
+            <tr><td>E02</td><td>Bob</td><td>HR</td></tr>
+            <tr><td>E05</td><td>Eva</td><td>HR</td></tr>
+            <tr><td>E04</td><td>David</td><td>Finance</td></tr>
+            <tr><td>E06</td><td>Frank</td><td>Finance</td></tr>
+            <tr><td class="null-val">NULL</td><td class="null-val">NULL</td><td class="highlight-val">Marketing</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FULL OUTER JOIN -->
+    <div class="topic-section">
+      <span class="section-anchor" id="full-join"></span>
+      <div class="section-header">
+        <div class="section-num">7.4</div>
+        <h2>FULL OUTER JOIN</h2>
+      </div>
+      <p><strong>What it returns:</strong> All rows from both tables. Where there's no match on either side, NULLs fill the gaps.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — FULL OUTER JOIN</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- All employees AND all departments</span>
+<span class="kw">SELECT</span>
+    <span class="tbl">e</span>.<span class="col">EmpID</span>,
+    <span class="tbl">e</span>.<span class="col">EmpName</span>,
+    <span class="tbl">d</span>.<span class="col">DeptID</span>,
+    <span class="tbl">d</span>.<span class="col">DeptName</span>
+<span class="kw">FROM</span>            <span class="tbl">EMPLOYEES</span>   <span class="tbl">e</span>
+<span class="kw">FULL OUTER JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>  <span class="kw">ON</span>  <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: FULL OUTER JOIN — Grace and Marketing both included</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th><th>DeptID</th><th>DeptName</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td><td>D10</td><td>IT</td></tr>
+            <tr><td>E02</td><td>Bob</td><td>D20</td><td>HR</td></tr>
+            <tr><td>E03</td><td>Carol</td><td>D10</td><td>IT</td></tr>
+            <tr><td>E04</td><td>David</td><td>D30</td><td>Finance</td></tr>
+            <tr><td>E05</td><td>Eva</td><td>D20</td><td>HR</td></tr>
+            <tr><td>E06</td><td>Frank</td><td>D30</td><td>Finance</td></tr>
+            <tr><td class="highlight-val">E07</td><td class="highlight-val">Grace</td><td class="null-val">NULL</td><td class="null-val">NULL</td></tr>
+            <tr><td class="null-val">NULL</td><td class="null-val">NULL</td><td class="highlight-val">D40</td><td class="highlight-val">Marketing</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CROSS JOIN -->
+    <div class="topic-section">
+      <span class="section-anchor" id="cross-join"></span>
+      <div class="section-header">
+        <div class="section-num">7.5</div>
+        <h2>CROSS JOIN — Cartesian Product</h2>
+      </div>
+      <p><strong>What it returns:</strong> Every row from the left table paired with every row from the right table. M × N rows total. No join condition needed.</p>
+      <p><strong>When to use:</strong> Generate all combinations (e.g., product + size + color, days of week + shifts).</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — CROSS JOIN</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Generate all dept + project combinations (4 × 4 = 16 rows)</span>
+<span class="kw">SELECT</span>
+    <span class="tbl">d</span>.<span class="col">DeptName</span>,
+    <span class="tbl">p</span>.<span class="col">ProjectName</span>
+<span class="kw">FROM</span>       <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>
+<span class="kw">CROSS JOIN</span> <span class="tbl">PROJECTS</span>    <span class="tbl">p</span>;</code></pre>
+      </div>
+
+      <div class="info-box warning">
+        <div class="info-title">⚠️ Warning</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">On large tables, CROSS JOIN creates enormous result sets. 1000 × 1000 = 1,000,000 rows. Always use intentionally.</p>
+      </div>
+    </div>
+
+    <!-- SELF JOIN -->
+    <div class="topic-section">
+      <span class="section-anchor" id="self-join"></span>
+      <div class="section-header">
+        <div class="section-num">7.6</div>
+        <h2>SELF JOIN — Joining a Table to Itself</h2>
+      </div>
+      <p><strong>When to use:</strong> When a table has a relationship with itself — for example, employees have a ManagerID that refers to another EmpID in the same table.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — SELF JOIN (Employee-Manager)</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- List each employee with their manager's name</span>
+<span class="cmt">-- Use TWO aliases for the SAME table</span>
+<span class="kw">SELECT</span>
+    <span class="tbl">emp</span>.<span class="col">EmpID</span>,
+    <span class="tbl">emp</span>.<span class="col">EmpName</span>                            <span class="kw">AS</span> EmployeeName,
+    <span class="tbl">mgr</span>.<span class="col">EmpName</span>                            <span class="kw">AS</span> ManagerName
+<span class="kw">FROM</span>      <span class="tbl">EMPLOYEES</span> <span class="tbl">emp</span>
+<span class="kw">LEFT JOIN</span> <span class="tbl">EMPLOYEES</span> <span class="tbl">mgr</span>  <span class="kw">ON</span>  <span class="tbl">emp</span>.<span class="col">ManagerID</span> <span class="op">=</span> <span class="tbl">mgr</span>.<span class="col">EmpID</span>;
+<span class="cmt">-- LEFT JOIN ensures Carol, Eva, Frank (no manager) are still shown</span></code></pre>
+      </div>
+
+      <div class="result-label">Result: SELF JOIN — Employee with their Manager</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmployeeName</th><th>ManagerName</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td><td>Carol</td></tr>
+            <tr><td>E02</td><td>Bob</td><td>Eva</td></tr>
+            <tr><td>E03</td><td>Carol</td><td class="null-val">NULL (Top level)</td></tr>
+            <tr><td>E04</td><td>David</td><td>Frank</td></tr>
+            <tr><td>E05</td><td>Eva</td><td class="null-val">NULL (Top level)</td></tr>
+            <tr><td>E06</td><td>Frank</td><td class="null-val">NULL (Top level)</td></tr>
+            <tr><td>E07</td><td>Grace</td><td>Carol</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Self Join Key Points</div>
+        <ul>
+          <li>Always use <strong>table aliases</strong> to distinguish the two copies of the same table.</li>
+          <li>Use LEFT JOIN if some rows might not have a matching self-reference (e.g., top-level managers).</li>
+          <li>Common use cases: employee–manager, category–subcategory, city–distance matrix.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- MULTI-TABLE JOIN -->
+    <div class="topic-section">
+      <span class="section-anchor" id="multi-join"></span>
+      <div class="section-header">
+        <div class="section-num">7.7</div>
+        <h2>Joining 3+ Tables in One Query</h2>
+      </div>
+      <p>You can chain as many joins as you need. Each join adds another table to the result.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — 3-Table JOIN</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Employees + their Department + Department's Projects</span>
+<span class="kw">SELECT</span>
+    <span class="tbl">e</span>.<span class="col">EmpName</span>,
+    <span class="tbl">d</span>.<span class="col">DeptName</span>,
+    <span class="tbl">p</span>.<span class="col">ProjectName</span>,
+    <span class="tbl">p</span>.<span class="col">Budget</span>
+<span class="kw">FROM</span>       <span class="tbl">EMPLOYEES</span>   <span class="tbl">e</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>  <span class="kw">ON</span>  <span class="tbl">e</span>.<span class="col">DeptID</span>   <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">PROJECTS</span>    <span class="tbl">p</span>  <span class="kw">ON</span>  <span class="tbl">d</span>.<span class="col">DeptID</span>   <span class="op">=</span> <span class="tbl">p</span>.<span class="col">DeptID</span>
+<span class="kw">ORDER BY</span>   <span class="tbl">d</span>.<span class="col">DeptName</span>, <span class="tbl">e</span>.<span class="col">EmpName</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: 3-table JOIN (Employees + Department + Projects)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>DeptName</th><th>ProjectName</th><th>Budget</th></tr></thead>
+          <tbody>
+            <tr><td>Alice</td><td>IT</td><td>Website Redesign</td><td>500000</td></tr>
+            <tr><td>Alice</td><td>IT</td><td>AI Dashboard</td><td>800000</td></tr>
+            <tr><td>Carol</td><td>IT</td><td>Website Redesign</td><td>500000</td></tr>
+            <tr><td>Carol</td><td>IT</td><td>AI Dashboard</td><td>800000</td></tr>
+            <tr><td>Bob</td><td>HR</td><td>HR Portal</td><td>200000</td></tr>
+            <tr><td>Eva</td><td>HR</td><td>HR Portal</td><td>200000</td></tr>
+            <tr><td>David</td><td>Finance</td><td>Audit System</td><td>350000</td></tr>
+            <tr><td>Frank</td><td>Finance</td><td>Audit System</td><td>350000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SET OPERATIONS -->
+    <div class="topic-section">
+      <span class="section-anchor" id="set-operations"></span>
+      <div class="section-header">
+        <div class="section-num">7.8</div>
+        <h2>Set Operations — UNION, INTERSECT, EXCEPT</h2>
+      </div>
+      <p>Set operations combine the results of two SELECT queries. Both queries must return the <strong>same number of columns</strong> with <strong>compatible data types</strong>.</p>
+
+      <div class="result-label">Setup Tables for Set Operations</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>MumbaiEmployees (E01, E03, E06)</th><th>ITEmployees (E01, E03, E07)</th></tr></thead>
+          <tbody>
+            <tr><td>E01 — Alice</td><td>E01 — Alice</td></tr>
+            <tr><td>E03 — Carol</td><td>E03 — Carol</td></tr>
+            <tr><td>E06 — Frank</td><td>E07 — Grace</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>UNION — All Unique Rows from Both Queries</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — UNION</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Employees from Mumbai OR in IT (no duplicates)</span>
+<span class="kw">SELECT</span> <span class="col">EmpID</span>, <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="kw">WHERE</span> <span class="col">City</span> <span class="op">=</span> <span class="str">'Mumbai'</span>
+<span class="kw">UNION</span>
+<span class="kw">SELECT</span> <span class="col">EmpID</span>, <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="kw">WHERE</span> <span class="col">Dept</span> <span class="op">=</span> <span class="str">'IT'</span>;</code></pre>
+      </div>
+
+      <div class="result-label">UNION Result (Alice, Carol deduplicated; Frank + Grace added)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td></tr>
+            <tr><td>E03</td><td>Carol</td></tr>
+            <tr><td>E06</td><td>Frank</td></tr>
+            <tr><td>E07</td><td>Grace</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>UNION ALL — All Rows Including Duplicates</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — UNION ALL</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span> <span class="col">EmpID</span>, <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="kw">WHERE</span> <span class="col">City</span> <span class="op">=</span> <span class="str">'Mumbai'</span>
+<span class="kw">UNION ALL</span>
+<span class="kw">SELECT</span> <span class="col">EmpID</span>, <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="kw">WHERE</span> <span class="col">Dept</span> <span class="op">=</span> <span class="str">'IT'</span>;</code></pre>
+      </div>
+
+      <div class="result-label">UNION ALL Result (Alice & Carol appear twice!)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td class="highlight-val">Alice ← from Mumbai</td></tr>
+            <tr><td>E03</td><td class="highlight-val">Carol ← from Mumbai</td></tr>
+            <tr><td>E06</td><td>Frank</td></tr>
+            <tr><td>E01</td><td class="highlight-val">Alice ← from IT</td></tr>
+            <tr><td>E03</td><td class="highlight-val">Carol ← from IT</td></tr>
+            <tr><td>E07</td><td>Grace</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>INTERSECT — Only Rows in BOTH Queries</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — INTERSECT</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Employees who are BOTH in Mumbai AND in IT</span>
+<span class="kw">SELECT</span> <span class="col">EmpID</span>, <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="kw">WHERE</span> <span class="col">City</span> <span class="op">=</span> <span class="str">'Mumbai'</span>
+<span class="kw">INTERSECT</span>
+<span class="kw">SELECT</span> <span class="col">EmpID</span>, <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="kw">WHERE</span> <span class="col">Dept</span> <span class="op">=</span> <span class="str">'IT'</span>;</code></pre>
+      </div>
+
+      <div class="result-label">INTERSECT Result (only those in BOTH sets)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td></tr>
+            <tr><td>E03</td><td>Carol</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>EXCEPT — Rows in First Query but NOT in Second</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — EXCEPT</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Mumbai employees who are NOT in IT dept</span>
+<span class="kw">SELECT</span> <span class="col">EmpID</span>, <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="kw">WHERE</span> <span class="col">City</span> <span class="op">=</span> <span class="str">'Mumbai'</span>
+<span class="kw">EXCEPT</span>
+<span class="kw">SELECT</span> <span class="col">EmpID</span>, <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="kw">WHERE</span> <span class="col">Dept</span> <span class="op">=</span> <span class="str">'IT'</span>;</code></pre>
+      </div>
+
+      <div class="result-label">EXCEPT Result (Frank — in Mumbai, but not in IT)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th></tr></thead>
+          <tbody>
+            <tr><td>E06</td><td>Frank</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <table class="compare-table">
+        <thead><tr><th>Operation</th><th>Returns</th><th>Duplicates?</th></tr></thead>
+        <tbody>
+          <tr><td><code>UNION</code></td><td>All rows from A + B</td><td>Removed</td></tr>
+          <tr><td><code>UNION ALL</code></td><td>All rows from A + B</td><td>Kept</td></tr>
+          <tr><td><code>INTERSECT</code></td><td>Rows in both A and B</td><td>Removed</td></tr>
+          <tr><td><code>EXCEPT</code></td><td>Rows in A but not in B</td><td>Removed</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Join Summary</div>
+        <ul>
+          <li><strong>INNER JOIN:</strong> Only matching rows from both sides.</li>
+          <li><strong>LEFT JOIN:</strong> All left rows + matching right rows (NULLs for non-matches).</li>
+          <li><strong>RIGHT JOIN:</strong> All right rows + matching left rows.</li>
+          <li><strong>FULL OUTER JOIN:</strong> All rows from both sides.</li>
+          <li><strong>CROSS JOIN:</strong> Every combination of rows (M × N).</li>
+          <li><strong>SELF JOIN:</strong> Table joined to itself using aliases.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+
+  <div class="page-nav-footer">
+    <a href="part6-groupby-having.html" class="nav-link-card">
+      <div class="nlc-arrow">←</div>
+      <div>
+        <div class="nlc-label">Chapter 6</div>
+        <div class="nlc-title">GROUP BY · HAVING</div>
+      </div>
+    </a>
+    <a href="part8-subqueries-sets.html" class="nav-link-card next">
+      <div class="nlc-arrow">→</div>
+      <div>
+        <div class="nlc-label">Chapter 8</div>
+        <div class="nlc-title">Subqueries & Advanced</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<button class="back-to-top" id="backToTop">↑</button>
+<script src="nav.js"></script>
+<script>buildSidebar('part7-joins.html');</script>
+</body>
+</html>

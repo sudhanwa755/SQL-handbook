@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HSQLDB Complete Handbook — Table of Contents</title>
+<meta name="description" content="A comprehensive, beautifully structured HSQLDB/SQL handbook covering normalization, keys, constraints, DDL, DML, queries, joins, subqueries, and more." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar"></aside>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span class="crumb-current">🏠 Home</span>
+    </div>
+    <div class="topbar-actions">
+      <a href="part1-normalization.html" class="btn btn-primary">▶ Start Learning</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero-section animate-in">
+    <div class="hero-label">✦ Complete Reference Guide</div>
+    <h1 class="hero-title">The HSQLDB<br /><span class="accent">Handbook</span></h1>
+    <p class="hero-desc">
+      A comprehensive, teacher-crafted SQL textbook covering everything from database theory to advanced subqueries. 
+      Every concept comes with an explanation, key points, mistakes to avoid, example queries, and <strong>result tables</strong>.
+    </p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-num">8</span>
+        <span class="stat-label">Chapters</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">6</span>
+        <span class="stat-label">Parts</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">60+</span>
+        <span class="stat-label">Topics</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">100+</span>
+        <span class="stat-label">Examples</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABLE OF CONTENTS GRID -->
+  <section class="content-area" style="max-width:1100px;">
+
+    <div style="margin-bottom:32px;">
+      <h2 style="font-family:'Fraunces',serif; font-size:28px; color:var(--text-heading); margin-bottom:8px;">📖 Table of Contents</h2>
+      <p style="color:var(--text-muted); font-size:14px;">Click any chapter to jump directly to it. Topics are ordered from beginner to advanced.</p>
+    </div>
+
+    <div class="toc-grid">
+
+      <!-- Chapter 1 -->
+      <a href="part1-normalization.html" class="toc-card">
+        <div class="toc-card-header">
+          <div class="toc-card-icon">📐</div>
+          <div>
+            <div class="toc-card-part">Part 1 · Chapter 1</div>
+            <div class="toc-card-title">Database Normalization</div>
+          </div>
+        </div>
+        <div class="toc-card-body">
+          <ul class="toc-topic-list">
+            <li>1.1 What is normalization and why it matters</li>
+            <li>1.2 First Normal Form (1NF) — atomic values</li>
+            <li>1.3 Second Normal Form (2NF) — no partial dependency</li>
+            <li>1.4 Third Normal Form (3NF) — no transitive dependency</li>
+            <li>1.5 Identifying which NF a table is in (with examples)</li>
+          </ul>
+        </div>
+        <div class="toc-card-footer">
+          <span class="toc-count">5 topics · Beginner</span>
+          <span class="toc-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Chapter 2 -->
+      <a href="part2-keys-constraints.html" class="toc-card">
+        <div class="toc-card-header">
+          <div class="toc-card-icon">🔑</div>
+          <div>
+            <div class="toc-card-part">Part 1 · Chapter 2</div>
+            <div class="toc-card-title">Keys & Constraints</div>
+          </div>
+        </div>
+        <div class="toc-card-body">
+          <ul class="toc-topic-list">
+            <li>2.1 Super Key, Candidate Key, Primary Key</li>
+            <li>2.2 Alternate Key, Foreign Key, Composite Key</li>
+            <li>2.3 NOT NULL, UNIQUE, CHECK constraints</li>
+            <li>2.4 DEFAULT constraint with examples</li>
+            <li>2.5 How to combine multiple constraints</li>
+          </ul>
+        </div>
+        <div class="toc-card-footer">
+          <span class="toc-count">10 topics · Beginner</span>
+          <span class="toc-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Chapter 3 -->
+      <a href="part3-ddl-dml-tcl.html" class="toc-card">
+        <div class="toc-card-header">
+          <div class="toc-card-icon">🛠️</div>
+          <div>
+            <div class="toc-card-part">Part 1 · Chapter 3</div>
+            <div class="toc-card-title">DDL · DML · TCL</div>
+          </div>
+        </div>
+        <div class="toc-card-body">
+          <ul class="toc-topic-list">
+            <li>3.1 CREATE TABLE, ALTER TABLE, DROP TABLE</li>
+            <li>3.2 INSERT INTO (single & multi-row)</li>
+            <li>3.3 UPDATE with WHERE conditions</li>
+            <li>3.4 DELETE and TRUNCATE</li>
+            <li>3.5 COMMIT, ROLLBACK, SAVEPOINT</li>
+          </ul>
+        </div>
+        <div class="toc-card-footer">
+          <span class="toc-count">12 topics · Beginner</span>
+          <span class="toc-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Chapter 4 -->
+      <a href="part4-select-where.html" class="toc-card">
+        <div class="toc-card-header">
+          <div class="toc-card-icon">🔍</div>
+          <div>
+            <div class="toc-card-part">Part 2 · Chapter 4</div>
+            <div class="toc-card-title">SELECT · WHERE · ORDER BY</div>
+          </div>
+        </div>
+        <div class="toc-card-body">
+          <ul class="toc-topic-list">
+            <li>4.1 SELECT, FROM, DISTINCT clauses</li>
+            <li>4.2 WHERE with all comparison operators</li>
+            <li>4.3 AND / OR logic — brackets vs bracket-less</li>
+            <li>4.4 BETWEEN, IN, IS NULL conditions</li>
+            <li>4.5 LIKE pattern matching (% and _)</li>
+            <li>4.6 ORDER BY single/multi-column, ASC/DESC</li>
+          </ul>
+        </div>
+        <div class="toc-card-footer">
+          <span class="toc-count">14 topics · Beginner–Intermediate</span>
+          <span class="toc-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Chapter 5 -->
+      <a href="part5-functions.html" class="toc-card">
+        <div class="toc-card-header">
+          <div class="toc-card-icon">⚙️</div>
+          <div>
+            <div class="toc-card-part">Part 2 · Chapter 5</div>
+            <div class="toc-card-title">NULL Handling & Functions</div>
+          </div>
+        </div>
+        <div class="toc-card-body">
+          <ul class="toc-topic-list">
+            <li>5.1 NULL — what it is and how it behaves</li>
+            <li>5.2 NVL and COALESCE for NULL replacement</li>
+            <li>5.3 CAST for type conversion</li>
+            <li>5.4 String functions: CONCAT, UPPER, LOWER, TRIM, LENGTH</li>
+            <li>5.5 TO_CHAR (dates & numbers) and TO_DATE</li>
+            <li>5.6 Math functions: ROUND, FLOOR, CEIL, MOD</li>
+          </ul>
+        </div>
+        <div class="toc-card-footer">
+          <span class="toc-count">16 topics · Intermediate</span>
+          <span class="toc-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Chapter 6 -->
+      <a href="part6-groupby-having.html" class="toc-card">
+        <div class="toc-card-header">
+          <div class="toc-card-icon">📊</div>
+          <div>
+            <div class="toc-card-part">Part 3 · Chapter 6</div>
+            <div class="toc-card-title">GROUP BY & HAVING</div>
+          </div>
+        </div>
+        <div class="toc-card-body">
+          <ul class="toc-topic-list">
+            <li>6.1 Aggregate functions: COUNT, SUM, AVG, MIN, MAX</li>
+            <li>6.2 GROUP BY — grouping rows by column values</li>
+            <li>6.3 HAVING — filtering aggregated groups</li>
+            <li>6.4 WHERE vs HAVING — exact difference with examples</li>
+            <li>6.5 Combining WHERE + GROUP BY + HAVING</li>
+          </ul>
+        </div>
+        <div class="toc-card-footer">
+          <span class="toc-count">10 topics · Intermediate</span>
+          <span class="toc-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Chapter 7 -->
+      <a href="part7-joins.html" class="toc-card">
+        <div class="toc-card-header">
+          <div class="toc-card-icon">🔗</div>
+          <div>
+            <div class="toc-card-part">Part 4 · Chapter 7</div>
+            <div class="toc-card-title">Joins & Multi-Table Queries</div>
+          </div>
+        </div>
+        <div class="toc-card-body">
+          <ul class="toc-topic-list">
+            <li>7.1 INNER JOIN — matching rows only</li>
+            <li>7.2 LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN</li>
+            <li>7.3 CROSS JOIN — cartesian product</li>
+            <li>7.4 SELF JOIN — joining a table to itself</li>
+            <li>7.5 Joining 3+ tables in one query</li>
+            <li>7.6 Set Operations: UNION, UNION ALL, INTERSECT, EXCEPT</li>
+          </ul>
+        </div>
+        <div class="toc-card-footer">
+          <span class="toc-count">12 topics · Intermediate–Advanced</span>
+          <span class="toc-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Chapter 8 -->
+      <a href="part8-subqueries-sets.html" class="toc-card">
+        <div class="toc-card-header">
+          <div class="toc-card-icon">🧩</div>
+          <div>
+            <div class="toc-card-part">Part 4 · Chapter 8</div>
+            <div class="toc-card-title">Subqueries & Advanced</div>
+          </div>
+        </div>
+        <div class="toc-card-body">
+          <ul class="toc-topic-list">
+            <li>8.1 Scalar Subqueries — returning a single value</li>
+            <li>8.2 Multi-row Subqueries with IN, ANY, ALL</li>
+            <li>8.3 Correlated Subqueries — referencing outer query</li>
+            <li>8.4 Subqueries in SELECT, FROM, WHERE</li>
+            <li>8.5 EXISTS and NOT EXISTS</li>
+            <li>8.6 Nested subqueries</li>
+          </ul>
+        </div>
+        <div class="toc-card-footer">
+          <span class="toc-count">10 topics · Advanced</span>
+          <span class="toc-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Quick Reference -->
+    <h3 style="font-family:'Fraunces',serif; font-size:24px; color:var(--text-heading); margin-bottom:20px;">⚡ Quick Reference — SQL Command Categories</h3>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Full Name</th>
+          <th>Commands</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-gold">DDL</span></td>
+          <td>Data Definition Language</td>
+          <td><code>CREATE, ALTER, DROP, TRUNCATE</code></td>
+          <td>Define or modify database structure</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-green">DML</span></td>
+          <td>Data Manipulation Language</td>
+          <td><code>INSERT, UPDATE, DELETE</code></td>
+          <td>Manipulate the data inside tables</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-violet">DQL</span></td>
+          <td>Data Query Language</td>
+          <td><code>SELECT</code></td>
+          <td>Retrieve data from tables</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-red">TCL</span></td>
+          <td>Transaction Control Language</td>
+          <td><code>COMMIT, ROLLBACK, SAVEPOINT</code></td>
+          <td>Control the outcome of transactions</td>
+        </tr>
+        <tr>
+          <td><span class="tag" style="background:rgba(91,163,245,0.15);color:var(--accent-blue);">DCL</span></td>
+          <td>Data Control Language</td>
+          <td><code>GRANT, REVOKE</code></td>
+          <td>Manage permissions and access</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <!-- FOOTER NAV -->
+  <div class="page-nav-footer">
+    <div></div>
+    <a href="part1-normalization.html" class="nav-link-card next">
+      <div class="nlc-arrow">→</div>
+      <div>
+        <div class="nlc-label">Chapter 1</div>
+        <div class="nlc-title">Database Normalization</div>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+<button class="back-to-top" id="backToTop">↑</button>
+
+<script src="nav.js"></script>
+<script>
+  buildSidebar('index.html');
+</script>
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DDL, DML & TCL Commands — HSQLDB Handbook</title>
+<meta name="description" content="Complete guide to DDL (CREATE, ALTER, DROP), DML (INSERT, UPDATE, DELETE), and TCL (COMMIT, ROLLBACK) commands with examples and result tables." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-content">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <a href="index.html" class="crumb">Home</a>
+      <span class="sep">›</span>
+      <span class="crumb">Part 1</span>
+      <span class="sep">›</span>
+      <span class="crumb-current">DDL · DML · TCL</span>
+    </div>
+    <div class="topbar-actions">
+      <a href="part4-select-where.html" class="btn btn-primary">Next Chapter →</a>
+    </div>
+  </header>
+
+  <div class="content-area">
+
+    <div class="page-header">
+      <div class="part-badge">🛠️ Part 1 · Chapter 3</div>
+      <h1 class="page-title">DDL · DML · TCL</h1>
+      <p class="page-subtitle">
+        The three pillars of SQL commands. <strong>DDL</strong> defines structure, <strong>DML</strong> manipulates data, 
+        and <strong>TCL</strong> controls transactions. Master these and you can build and manage any database.
+      </p>
+      <div class="page-meta">
+        <div class="meta-item"><span class="meta-icon">⏱</span> ~30 min read</div>
+        <div class="meta-item"><span class="meta-icon">🎯</span> Beginner</div>
+        <div class="meta-item"><span class="meta-icon">📋</span> 12 sections</div>
+      </div>
+    </div>
+
+    <!-- ===== DDL ===== -->
+    <div class="topic-section">
+      <span class="section-anchor" id="ddl"></span>
+      <div class="section-header">
+        <div class="section-num">3.1</div>
+        <h2>DDL — Data Definition Language</h2>
+      </div>
+      <p>DDL commands define and modify the <strong>structure</strong> (schema) of database objects like tables, indexes, and views.</p>
+      <div class="info-box note">
+        <div class="info-title">📘 Note</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">DDL commands are <strong>auto-committed</strong> — they take effect immediately and cannot be rolled back in most databases (including standard HSQLDB behavior).</p>
+      </div>
+    </div>
+
+    <!-- CREATE TABLE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="create"></span>
+      <div class="section-header">
+        <div class="section-num">3.2</div>
+        <h2>CREATE TABLE</h2>
+      </div>
+      <p><strong>When to use:</strong> To create a new table in the database.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — CREATE TABLE Syntax</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">CREATE TABLE</span> <span class="tbl">table_name</span> (
+    <span class="col">column1</span>  <span class="kw">datatype</span>  <span class="kw">constraint</span>,
+    <span class="col">column2</span>  <span class="kw">datatype</span>  <span class="kw">constraint</span>,
+    ...
+);</code></pre>
+      </div>
+
+      <h3>Example — Create a PRODUCTS table</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">CREATE TABLE</span> <span class="tbl">PRODUCTS</span> (
+    <span class="col">ProductID</span>    <span class="kw">INT</span>             <span class="kw">PRIMARY KEY</span>,
+    <span class="col">ProductName</span>  <span class="kw">VARCHAR</span>(<span class="num">100</span>)    <span class="kw">NOT NULL</span>,
+    <span class="col">Category</span>     <span class="kw">VARCHAR</span>(<span class="num">50</span>)     <span class="kw">DEFAULT</span> <span class="str">'General'</span>,
+    <span class="col">Price</span>        <span class="kw">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>)   <span class="kw">CHECK</span> (<span class="col">Price</span> <span class="op">>=</span> <span class="num">0</span>),
+    <span class="col">Stock</span>        <span class="kw">INT</span>             <span class="kw">DEFAULT</span> <span class="num">0</span>
+);</code></pre>
+      </div>
+
+      <div class="result-label">Result: PRODUCTS table is created (empty)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>ProductID</th><th>ProductName</th><th>Category</th><th>Price</th><th>Stock</th></tr></thead>
+          <tbody>
+            <tr><td colspan="5" style="text-align:center; color:var(--text-muted); font-style:italic;">Table created — no rows yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Common HSQLDB Data Types</h3>
+      <table class="compare-table">
+        <thead><tr><th>Data Type</th><th>Example</th><th>Use For</th></tr></thead>
+        <tbody>
+          <tr><td><code>INT</code></td><td><code>42</code></td><td>Whole numbers</td></tr>
+          <tr><td><code>BIGINT</code></td><td><code>9999999999</code></td><td>Very large integers</td></tr>
+          <tr><td><code>DECIMAL(p,s)</code></td><td><code>1234.56</code></td><td>Exact decimal numbers (money)</td></tr>
+          <tr><td><code>VARCHAR(n)</code></td><td><code>'Alice'</code></td><td>Variable-length text</td></tr>
+          <tr><td><code>CHAR(n)</code></td><td><code>'M'</code></td><td>Fixed-length text</td></tr>
+          <tr><td><code>DATE</code></td><td><code>'2024-01-15'</code></td><td>Dates (no time)</td></tr>
+          <tr><td><code>TIMESTAMP</code></td><td><code>'2024-01-15 10:30:00'</code></td><td>Date + time</td></tr>
+          <tr><td><code>BOOLEAN</code></td><td><code>TRUE / FALSE</code></td><td>True/False flags</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ALTER TABLE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="alter"></span>
+      <div class="section-header">
+        <div class="section-num">3.3</div>
+        <h2>ALTER TABLE</h2>
+      </div>
+      <p><strong>When to use:</strong> To modify an existing table — add/remove columns, change data types, add constraints.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — ALTER TABLE Examples</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Add a new column</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">PRODUCTS</span>
+    <span class="kw">ADD COLUMN</span> <span class="col">Description</span> <span class="kw">VARCHAR</span>(<span class="num">500</span>);
+
+<span class="cmt">-- Drop (remove) a column</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">PRODUCTS</span>
+    <span class="kw">DROP COLUMN</span> <span class="col">Description</span>;
+
+<span class="cmt">-- Rename a column (HSQLDB syntax)</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">PRODUCTS</span>
+    <span class="kw">ALTER COLUMN</span> <span class="col">Stock</span> <span class="kw">RENAME TO</span> <span class="col">QuantityInStock</span>;
+
+<span class="cmt">-- Change column data type</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">PRODUCTS</span>
+    <span class="kw">ALTER COLUMN</span> <span class="col">Price</span> <span class="kw">SET DATA TYPE</span> <span class="kw">DECIMAL</span>(<span class="num">12</span>,<span class="num">2</span>);
+
+<span class="cmt">-- Add a NOT NULL constraint</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">PRODUCTS</span>
+    <span class="kw">ALTER COLUMN</span> <span class="col">Category</span> <span class="kw">SET NOT NULL</span>;</code></pre>
+      </div>
+
+      <div class="info-box mistakes">
+        <div class="info-title">⚠️ Mistakes to Avoid</div>
+        <ul>
+          <li>Trying to add a NOT NULL column to a table that already has data — existing rows will have NULL in that column → error. First add the column, then populate it, then add NOT NULL.</li>
+          <li>Dropping a column that is referenced by a foreign key — this will fail.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- DROP TABLE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="drop"></span>
+      <div class="section-header">
+        <div class="section-num">3.4</div>
+        <h2>DROP TABLE</h2>
+      </div>
+      <p><strong>When to use:</strong> To completely delete a table — its structure AND all its data — permanently.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — DROP TABLE</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Drop a table completely</span>
+<span class="kw">DROP TABLE</span> <span class="tbl">PRODUCTS</span>;
+
+<span class="cmt">-- Safe drop: only drop if it exists</span>
+<span class="kw">DROP TABLE IF EXISTS</span> <span class="tbl">PRODUCTS</span>;</code></pre>
+      </div>
+
+      <div class="info-box warning">
+        <div class="info-title">🚨 Danger Zone</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;"><code>DROP TABLE</code> is <strong>irreversible</strong>. All data is gone permanently. Always double-check before running this in production.</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ===== DML ===== -->
+    <div class="topic-section">
+      <span class="section-anchor" id="dml"></span>
+      <div class="section-header">
+        <div class="section-num">3.5</div>
+        <h2>DML — Data Manipulation Language</h2>
+      </div>
+      <p>DML commands operate on the <strong>data inside</strong> tables, not the structure.</p>
+    </div>
+
+    <!-- INSERT -->
+    <div class="topic-section">
+      <span class="section-anchor" id="insert"></span>
+      <div class="section-header">
+        <div class="section-num">3.6</div>
+        <h2>INSERT INTO</h2>
+      </div>
+      <p><strong>When to use:</strong> To add new rows of data to a table.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — INSERT Syntax (Single Row)</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Insert a single row (all columns)</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">PRODUCTS</span> (<span class="col">ProductID</span>, <span class="col">ProductName</span>, <span class="col">Category</span>, <span class="col">Price</span>, <span class="col">Stock</span>)
+<span class="kw">VALUES</span> (<span class="num">1</span>, <span class="str">'Laptop'</span>, <span class="str">'Electronics'</span>, <span class="num">75000.00</span>, <span class="num">50</span>);
+
+<span class="cmt">-- Insert using DEFAULT for some columns</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">PRODUCTS</span> (<span class="col">ProductID</span>, <span class="col">ProductName</span>, <span class="col">Price</span>)
+<span class="kw">VALUES</span> (<span class="num">2</span>, <span class="str">'Mouse'</span>, <span class="num">500.00</span>);  <span class="cmt">-- Category gets 'General', Stock gets 0</span>
+
+<span class="cmt">-- Insert multiple rows at once</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">PRODUCTS</span> (<span class="col">ProductID</span>, <span class="col">ProductName</span>, <span class="col">Category</span>, <span class="col">Price</span>, <span class="col">Stock</span>)
+<span class="kw">VALUES</span>
+    (<span class="num">3</span>, <span class="str">'Keyboard'</span>, <span class="str">'Electronics'</span>, <span class="num">1500.00</span>, <span class="num">100</span>),
+    (<span class="num">4</span>, <span class="str">'Desk Lamp'</span>, <span class="str">'General'</span>,     <span class="num">800.00</span>,  <span class="num">30</span>),
+    (<span class="num">5</span>, <span class="str">'Notebook'</span>, <span class="str">'Books'</span>,        <span class="num">120.00</span>,  <span class="num">200</span>);</code></pre>
+      </div>
+
+      <div class="result-label">Result: PRODUCTS after all INSERTs</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>ProductID</th><th>ProductName</th><th>Category</th><th>Price</th><th>Stock</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Laptop</td><td>Electronics</td><td>75000.00</td><td>50</td></tr>
+            <tr><td>2</td><td>Mouse</td><td class="highlight-val">General</td><td>500.00</td><td class="highlight-val">0</td></tr>
+            <tr><td>3</td><td>Keyboard</td><td>Electronics</td><td>1500.00</td><td>100</td></tr>
+            <tr><td>4</td><td>Desk Lamp</td><td>General</td><td>800.00</td><td>30</td></tr>
+            <tr><td>5</td><td>Notebook</td><td>Books</td><td>120.00</td><td>200</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- UPDATE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="update"></span>
+      <div class="section-header">
+        <div class="section-num">3.7</div>
+        <h2>UPDATE</h2>
+      </div>
+      <p><strong>When to use:</strong> To modify existing data in one or more rows.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — UPDATE</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Update a single column for one row</span>
+<span class="kw">UPDATE</span> <span class="tbl">PRODUCTS</span>
+<span class="kw">SET</span>    <span class="col">Price</span> <span class="op">=</span> <span class="num">72000.00</span>
+<span class="kw">WHERE</span>  <span class="col">ProductID</span> <span class="op">=</span> <span class="num">1</span>;
+
+<span class="cmt">-- Update multiple columns at once</span>
+<span class="kw">UPDATE</span> <span class="tbl">PRODUCTS</span>
+<span class="kw">SET</span>    <span class="col">Price</span> <span class="op">=</span> <span class="num">600.00</span>,
+       <span class="col">Stock</span> <span class="op">=</span> <span class="num">75</span>
+<span class="kw">WHERE</span>  <span class="col">ProductID</span> <span class="op">=</span> <span class="num">2</span>;
+
+<span class="cmt">-- Update all rows of a category (give 10% discount)</span>
+<span class="kw">UPDATE</span> <span class="tbl">PRODUCTS</span>
+<span class="kw">SET</span>    <span class="col">Price</span> <span class="op">=</span> <span class="col">Price</span> <span class="op">*</span> <span class="num">0.90</span>
+<span class="kw">WHERE</span>  <span class="col">Category</span> <span class="op">=</span> <span class="str">'Electronics'</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: PRODUCTS after UPDATE (Electronics discounted 10%)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>ProductID</th><th>ProductName</th><th>Category</th><th>Price</th><th>Stock</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Laptop</td><td>Electronics</td><td class="highlight-val">64800.00</td><td>50</td></tr>
+            <tr><td>2</td><td>Mouse</td><td>General</td><td>600.00</td><td class="highlight-val">75</td></tr>
+            <tr><td>3</td><td>Keyboard</td><td>Electronics</td><td class="highlight-val">1350.00</td><td>100</td></tr>
+            <tr><td>4</td><td>Desk Lamp</td><td>General</td><td>800.00</td><td>30</td></tr>
+            <tr><td>5</td><td>Notebook</td><td>Books</td><td>120.00</td><td>200</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box warning">
+        <div class="info-title">🚨 Critical Warning</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">If you run <code>UPDATE PRODUCTS SET Price = 0</code> <strong>without a WHERE clause</strong>, it updates ALL rows in the table. Always double-check your WHERE clause!</p>
+      </div>
+    </div>
+
+    <!-- DELETE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="delete"></span>
+      <div class="section-header">
+        <div class="section-num">3.8</div>
+        <h2>DELETE</h2>
+      </div>
+      <p><strong>When to use:</strong> To remove specific rows from a table.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — DELETE</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Delete a specific row</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">PRODUCTS</span>
+<span class="kw">WHERE</span> <span class="col">ProductID</span> <span class="op">=</span> <span class="num">5</span>;
+
+<span class="cmt">-- Delete all products with Stock = 0</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">PRODUCTS</span>
+<span class="kw">WHERE</span> <span class="col">Stock</span> <span class="op">=</span> <span class="num">0</span>;
+
+<span class="cmt">-- Delete ALL rows (structure stays intact)</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">PRODUCTS</span>;</code></pre>
+      </div>
+
+      <table class="compare-table">
+        <thead><tr><th>Command</th><th>Removes Data?</th><th>Removes Structure?</th><th>Rollback?</th></tr></thead>
+        <tbody>
+          <tr><td><code>DELETE</code></td><td><span class="tag tag-green">Yes (rows)</span></td><td><span class="tag tag-red">No</span></td><td><span class="tag tag-green">Yes</span></td></tr>
+          <tr><td><code>TRUNCATE</code></td><td><span class="tag tag-green">Yes (all rows)</span></td><td><span class="tag tag-red">No</span></td><td><span class="tag tag-red">Usually No</span></td></tr>
+          <tr><td><code>DROP</code></td><td><span class="tag tag-green">Yes (everything)</span></td><td><span class="tag tag-green">Yes</span></td><td><span class="tag tag-red">No</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ===== TCL ===== -->
+    <div class="topic-section">
+      <span class="section-anchor" id="tcl"></span>
+      <div class="section-header">
+        <div class="section-num">3.9</div>
+        <h2>TCL — Transaction Control Language</h2>
+      </div>
+      <p>A <strong>transaction</strong> is a sequence of SQL operations treated as a single unit. Either ALL of them succeed, or NONE of them take effect.</p>
+      <div class="info-box note">
+        <div class="info-title">📘 ACID Properties</div>
+        <ul style="margin:0;">
+          <li style="font-size:13.5px; color:var(--text-secondary)"><strong>Atomicity:</strong> All or nothing.</li>
+          <li style="font-size:13.5px; color:var(--text-secondary)"><strong>Consistency:</strong> Database remains valid after transaction.</li>
+          <li style="font-size:13.5px; color:var(--text-secondary)"><strong>Isolation:</strong> Transactions don't interfere with each other.</li>
+          <li style="font-size:13.5px; color:var(--text-secondary)"><strong>Durability:</strong> Committed changes are permanent.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- COMMIT -->
+    <div class="topic-section">
+      <span class="section-anchor" id="commit"></span>
+      <div class="section-header">
+        <div class="section-num">3.10</div>
+        <h2>COMMIT</h2>
+      </div>
+      <p><strong>When to use:</strong> To permanently save all changes made in the current transaction.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — COMMIT Example (Bank Transfer)</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Transfer 5000 from Account A to Account B</span>
+<span class="kw">UPDATE</span> <span class="tbl">ACCOUNTS</span> <span class="kw">SET</span> <span class="col">Balance</span> <span class="op">=</span> <span class="col">Balance</span> <span class="op">-</span> <span class="num">5000</span> <span class="kw">WHERE</span> <span class="col">AccountID</span> <span class="op">=</span> <span class="str">'A'</span>;
+<span class="kw">UPDATE</span> <span class="tbl">ACCOUNTS</span> <span class="kw">SET</span> <span class="col">Balance</span> <span class="op">=</span> <span class="col">Balance</span> <span class="op">+</span> <span class="num">5000</span> <span class="kw">WHERE</span> <span class="col">AccountID</span> <span class="op">=</span> <span class="str">'B'</span>;
+
+<span class="cmt">-- If both succeeded, make it permanent:</span>
+<span class="kw">COMMIT</span>;</code></pre>
+      </div>
+    </div>
+
+    <!-- ROLLBACK -->
+    <div class="topic-section">
+      <span class="section-anchor" id="rollback"></span>
+      <div class="section-header">
+        <div class="section-num">8</div>
+        <h2>ROLLBACK</h2>
+      </div>
+      <p><strong>When to use:</strong> To undo all changes made in the current transaction, reverting the database to its last committed state.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — ROLLBACK Example</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Start updates</span>
+<span class="kw">UPDATE</span> <span class="tbl">ACCOUNTS</span> <span class="kw">SET</span> <span class="col">Balance</span> <span class="op">=</span> <span class="col">Balance</span> <span class="op">-</span> <span class="num">5000</span> <span class="kw">WHERE</span> <span class="col">AccountID</span> <span class="op">=</span> <span class="str">'A'</span>;
+<span class="cmt">-- Suppose an error occurs here (e.g. Account B doesn't exist)</span>
+<span class="cmt">-- Undo everything:</span>
+<span class="kw">ROLLBACK</span>;</code></pre>
+      </div>
+    </div>
+
+    <!-- SAVEPOINT -->
+    <div class="topic-section">
+      <span class="section-anchor" id="savepoint"></span>
+      <div class="section-header">
+        <div class="section-num">9</div>
+        <h2>SAVEPOINT</h2>
+      </div>
+      <p><strong>When to use:</strong> To mark a specific point within a transaction so you can partially rollback to that point instead of rolling back everything.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — SAVEPOINT Example</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">INSERT INTO</span> <span class="tbl">ORDERS</span> (<span class="col">OrderID</span>, <span class="col">CustomerID</span>) <span class="kw">VALUES</span> (<span class="num">101</span>, <span class="num">501</span>);
+<span class="kw">SAVEPOINT</span> after_order;        <span class="cmt">-- Save point here</span>
+
+<span class="kw">INSERT INTO</span> <span class="tbl">ORDER_ITEMS</span> (<span class="col">OrderID</span>, <span class="col">ProductID</span>, <span class="col">Qty</span>) <span class="kw">VALUES</span> (<span class="num">101</span>, <span class="num">3</span>, <span class="num">2</span>);
+<span class="cmt">-- Suppose this second insert fails or we want to undo just it:</span>
+<span class="kw">ROLLBACK TO SAVEPOINT</span> after_order;  <span class="cmt">-- Only undoes the ORDER_ITEMS insert</span>
+
+<span class="kw">COMMIT</span>;  <span class="cmt">-- Commits just the ORDERS insert</span></code></pre>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 TCL Summary</div>
+        <ul>
+          <li><code>COMMIT</code> — Save changes permanently.</li>
+          <li><code>ROLLBACK</code> — Undo all uncommitted changes.</li>
+          <li><code>SAVEPOINT name</code> — Mark a restore point within a transaction.</li>
+          <li><code>ROLLBACK TO SAVEPOINT name</code> — Undo back to a specific savepoint.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+
+  <div class="page-nav-footer">
+    <a href="part2-keys-constraints.html" class="nav-link-card">
+      <div class="nlc-arrow">←</div>
+      <div>
+        <div class="nlc-label">Chapter 2</div>
+        <div class="nlc-title">Keys & Constraints</div>
+      </div>
+    </a>
+    <a href="part4-select-where.html" class="nav-link-card next">
+      <div class="nlc-arrow">→</div>
+      <div>
+        <div class="nlc-label">Chapter 4</div>
+        <div class="nlc-title">SELECT · WHERE · ORDER BY</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<button class="back-to-top" id="backToTop">↑</button>
+<script src="nav.js"></script>
+<script>buildSidebar('part3-ddl-dml-tcl.html');</script>
+</body>
+</html>

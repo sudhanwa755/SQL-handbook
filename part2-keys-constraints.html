@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Keys & Constraints — HSQLDB Handbook</title>
+<meta name="description" content="Comprehensive guide to all database key types and constraints: Primary Key, Foreign Key, Composite Key, NOT NULL, UNIQUE, CHECK, DEFAULT with examples." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-content">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <a href="index.html" class="crumb">Home</a>
+      <span class="sep">›</span>
+      <span class="crumb">Part 1</span>
+      <span class="sep">›</span>
+      <span class="crumb-current">Keys & Constraints</span>
+    </div>
+    <div class="topbar-actions">
+      <a href="part3-ddl-dml-tcl.html" class="btn btn-primary">Next Chapter →</a>
+    </div>
+  </header>
+
+  <div class="content-area">
+
+    <div class="page-header">
+      <div class="part-badge">🔑 Part 1 · Chapter 2</div>
+      <h1 class="page-title">Keys & Constraints</h1>
+      <p class="page-subtitle">
+        Keys uniquely identify rows in a table. Constraints enforce data rules at the database level. 
+        Together they ensure <strong>data integrity</strong> and <strong>relational correctness</strong>.
+      </p>
+      <div class="page-meta">
+        <div class="meta-item"><span class="meta-icon">⏱</span> ~25 min read</div>
+        <div class="meta-item"><span class="meta-icon">🎯</span> Beginner</div>
+        <div class="meta-item"><span class="meta-icon">📋</span> 10 sections</div>
+      </div>
+    </div>
+
+    <!-- ===== PART A: KEYS ===== -->
+    <div class="topic-section">
+      <span class="section-anchor" id="keys-overview"></span>
+      <div class="section-header">
+        <div class="section-num">A</div>
+        <h2>Database Keys</h2>
+      </div>
+      <p>We use the following sample database throughout this chapter:</p>
+
+      <div class="result-label">Sample Table: EMPLOYEES</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>SSN</th><th>Email</th><th>EmpName</th><th>DeptID</th><th>PhoneNum</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>111-22-3333</td><td>alice@co.com</td><td>Alice</td><td>D10</td><td>9000000001</td></tr>
+            <tr><td>E02</td><td>222-33-4444</td><td>bob@co.com</td><td>Bob</td><td>D10</td><td>9000000002</td></tr>
+            <tr><td>E03</td><td>333-44-5555</td><td>carol@co.com</td><td>Carol</td><td>D20</td><td>9000000003</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 1. SUPER KEY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="super-key"></span>
+      <div class="section-header">
+        <div class="section-num">2.1</div>
+        <h2>Super Key</h2>
+      </div>
+      <p>A <strong>Super Key</strong> is any column (or set of columns) that can <strong>uniquely identify</strong> a row in a table. It may contain extra/unnecessary columns.</p>
+      <p>From the EMPLOYEES table, all of the following are super keys:</p>
+      <ul class="styled-list">
+        <li><code>{EmpID}</code></li>
+        <li><code>{SSN}</code></li>
+        <li><code>{Email}</code></li>
+        <li><code>{EmpID, EmpName}</code> ← unique but has extra column</li>
+        <li><code>{EmpID, SSN, Email}</code> ← unique but has extra columns</li>
+      </ul>
+      <div class="info-box note">
+        <div class="info-title">📘 Note</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">Super keys are the <em>universe</em> of unique identifiers. All other key types are specific subsets of super keys.</p>
+      </div>
+    </div>
+
+    <!-- 2. CANDIDATE KEY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="candidate-key"></span>
+      <div class="section-header">
+        <div class="section-num">2.2</div>
+        <h2>Candidate Key</h2>
+      </div>
+      <p>A <strong>Candidate Key</strong> is a <em>minimal</em> super key — a super key with no redundant columns. Every column in a candidate key is necessary for uniqueness.</p>
+      <p>From our table, candidate keys are:</p>
+      <ul class="styled-list">
+        <li><code>{EmpID}</code> — uniquely identifies each employee</li>
+        <li><code>{SSN}</code> — uniquely identifies each employee</li>
+        <li><code>{Email}</code> — uniquely identifies each employee</li>
+      </ul>
+      <p><code>{EmpID, EmpName}</code> is NOT a candidate key because removing <code>EmpName</code> still gives uniqueness.</p>
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Key Points</div>
+        <ul>
+          <li>Every table must have at least ONE candidate key.</li>
+          <li>Candidate keys are the minimal super keys.</li>
+          <li>One candidate key will be chosen as the Primary Key; the rest become Alternate Keys.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 3. PRIMARY KEY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="primary-key"></span>
+      <div class="section-header">
+        <div class="section-num">2.3</div>
+        <h2>Primary Key</h2>
+      </div>
+      <p>A <strong>Primary Key</strong> is the candidate key chosen to be the <em>main identifier</em> of rows in a table. It enforces two rules automatically:</p>
+      <ul class="styled-list">
+        <li><strong>Uniqueness:</strong> No two rows can have the same primary key value.</li>
+        <li><strong>NOT NULL:</strong> Primary key columns can never be NULL.</li>
+      </ul>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Create table with Primary Key</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">CREATE TABLE</span> <span class="tbl">EMPLOYEES</span> (
+    <span class="col">EmpID</span>    <span class="kw">VARCHAR</span>(<span class="num">5</span>)    <span class="kw">PRIMARY KEY</span>,
+    <span class="col">SSN</span>      <span class="kw">CHAR</span>(<span class="num">11</span>)     <span class="kw">UNIQUE</span>,
+    <span class="col">Email</span>    <span class="kw">VARCHAR</span>(<span class="num">100</span>)  <span class="kw">UNIQUE</span>,
+    <span class="col">EmpName</span>  <span class="kw">VARCHAR</span>(<span class="num">50</span>)   <span class="kw">NOT NULL</span>,
+    <span class="col">DeptID</span>   <span class="kw">VARCHAR</span>(<span class="num">5</span>)
+);</code></pre>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Key Points</div>
+        <ul>
+          <li>A table can have only <strong>ONE</strong> primary key (but it can span multiple columns — composite).</li>
+          <li>Primary key values should never change (avoid using names, phone numbers — use artificial IDs).</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 4. ALTERNATE KEY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="alternate-key"></span>
+      <div class="section-header">
+        <div class="section-num">2.4</div>
+        <h2>Alternate Key</h2>
+      </div>
+      <p>An <strong>Alternate Key</strong> is any candidate key that was <em>not chosen</em> as the primary key. In our EMPLOYEES table, if <code>EmpID</code> is the primary key, then <code>SSN</code> and <code>Email</code> are alternate keys.</p>
+      <p>They are typically enforced using the <code>UNIQUE</code> constraint.</p>
+    </div>
+
+    <!-- 5. COMPOSITE KEY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="composite-key"></span>
+      <div class="section-header">
+        <div class="section-num">2.5</div>
+        <h2>Composite Key</h2>
+      </div>
+      <p>A <strong>Composite Key</strong> is a primary key that consists of <strong>two or more columns</strong>. The combination of these columns must be unique — individually they may not be.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Composite Primary Key</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">CREATE TABLE</span> <span class="tbl">ENROLLMENT</span> (
+    <span class="col">StudentID</span>  <span class="kw">INT</span>,
+    <span class="col">CourseID</span>   <span class="kw">VARCHAR</span>(<span class="num">10</span>),
+    <span class="col">Grade</span>      <span class="kw">CHAR</span>(<span class="num">1</span>),
+    <span class="kw">PRIMARY KEY</span> (<span class="col">StudentID</span>, <span class="col">CourseID</span>)  <span class="cmt">-- Composite Key</span>
+);</code></pre>
+      </div>
+
+      <div class="result-label">Table: ENROLLMENT — Composite Key Example</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>StudentID 🔑</th><th>CourseID 🔑</th><th>Grade</th></tr></thead>
+          <tbody>
+            <tr><td>101</td><td>C01</td><td>A</td></tr>
+            <tr><td>101</td><td>C02</td><td>B</td></tr>
+            <tr><td>102</td><td>C01</td><td>C</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><code>StudentID=101</code> appears twice and <code>C01</code> appears twice, but the <strong>combination (101, C01)</strong> is unique — that's the composite key.</p>
+    </div>
+
+    <!-- 6. FOREIGN KEY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="foreign-key"></span>
+      <div class="section-header">
+        <div class="section-num">6</div>
+        <h2>Foreign Key</h2>
+      </div>
+      <p>A <strong>Foreign Key</strong> is a column in one table that refers to the <strong>Primary Key</strong> of another table. It enforces <em>referential integrity</em> — you cannot have an employee in department D99 if D99 doesn't exist in the DEPARTMENTS table.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Foreign Key</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">CREATE TABLE</span> <span class="tbl">DEPARTMENTS</span> (
+    <span class="col">DeptID</span>    <span class="kw">VARCHAR</span>(<span class="num">5</span>)   <span class="kw">PRIMARY KEY</span>,
+    <span class="col">DeptName</span>  <span class="kw">VARCHAR</span>(<span class="num">50</span>)  <span class="kw">NOT NULL</span>
+);
+
+<span class="kw">CREATE TABLE</span> <span class="tbl">EMPLOYEES</span> (
+    <span class="col">EmpID</span>    <span class="kw">VARCHAR</span>(<span class="num">5</span>)    <span class="kw">PRIMARY KEY</span>,
+    <span class="col">EmpName</span>  <span class="kw">VARCHAR</span>(<span class="num">50</span>)   <span class="kw">NOT NULL</span>,
+    <span class="col">DeptID</span>   <span class="kw">VARCHAR</span>(<span class="num">5</span>),
+    <span class="kw">FOREIGN KEY</span> (<span class="col">DeptID</span>) <span class="kw">REFERENCES</span> <span class="tbl">DEPARTMENTS</span>(<span class="col">DeptID</span>)
+);</code></pre>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Key Points — Foreign Key</div>
+        <ul>
+          <li>A foreign key value must exist in the referenced table's primary key column — or be NULL.</li>
+          <li>The child table (EMPLOYEES) holds the foreign key; the parent table (DEPARTMENTS) holds the primary key.</li>
+          <li>You cannot delete a row from the parent table if children reference it (unless you use CASCADE).</li>
+        </ul>
+      </div>
+      <div class="info-box mistakes">
+        <div class="info-title">⚠️ Mistakes to Avoid</div>
+        <ul>
+          <li>Trying to insert a foreign key value that doesn't exist in the parent table — this throws a constraint violation error.</li>
+          <li>Forgetting to create the parent table first before the child table.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ===== PART B: CONSTRAINTS ===== -->
+    <div class="topic-section">
+      <span class="section-anchor" id="constraints-overview"></span>
+      <div class="section-header">
+        <div class="section-num">B</div>
+        <h2>Database Constraints</h2>
+      </div>
+      <p>Constraints are rules enforced on table columns to maintain data accuracy and reliability.</p>
+    </div>
+
+    <!-- NOT NULL -->
+    <div class="topic-section">
+      <span class="section-anchor" id="not-null"></span>
+      <div class="section-header">
+        <div class="section-num">7</div>
+        <h2>NOT NULL Constraint</h2>
+      </div>
+      <p><strong>When to use:</strong> When a column must always have a value — you cannot leave it empty.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — NOT NULL</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">CREATE TABLE</span> <span class="tbl">STUDENTS</span> (
+    <span class="col">StudentID</span>  <span class="kw">INT</span>          <span class="kw">PRIMARY KEY</span>,
+    <span class="col">FirstName</span>  <span class="kw">VARCHAR</span>(<span class="num">50</span>)  <span class="kw">NOT NULL</span>,   <span class="cmt">-- Required</span>
+    <span class="col">LastName</span>   <span class="kw">VARCHAR</span>(<span class="num">50</span>)  <span class="kw">NOT NULL</span>,   <span class="cmt">-- Required</span>
+    <span class="col">MiddleName</span> <span class="kw">VARCHAR</span>(<span class="num">50</span>)             <span class="cmt">-- Optional (NULL allowed)</span>
+);</code></pre>
+      </div>
+
+      <div class="info-box mistakes">
+        <div class="info-title">⚠️ Mistakes to Avoid</div>
+        <ul><li>Trying to INSERT a row without providing a NOT NULL column — the database will reject it with an error.</li></ul>
+      </div>
+    </div>
+
+    <!-- UNIQUE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="unique"></span>
+      <div class="section-header">
+        <div class="section-num">8</div>
+        <h2>UNIQUE Constraint</h2>
+      </div>
+      <p><strong>When to use:</strong> When a column's values must all be different — but unlike PRIMARY KEY, NULL values <em>may</em> be allowed (multiple NULLs can often coexist).</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — UNIQUE</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">CREATE TABLE</span> <span class="tbl">USERS</span> (
+    <span class="col">UserID</span>    <span class="kw">INT</span>           <span class="kw">PRIMARY KEY</span>,
+    <span class="col">Email</span>     <span class="kw">VARCHAR</span>(<span class="num">200</span>)  <span class="kw">UNIQUE</span> <span class="kw">NOT NULL</span>,
+    <span class="col">Phone</span>     <span class="kw">VARCHAR</span>(<span class="num">15</span>)   <span class="kw">UNIQUE</span>         <span class="cmt">-- NULL allowed, but if set, must be unique</span>
+);</code></pre>
+      </div>
+
+      <table class="compare-table">
+        <thead><tr><th>Feature</th><th>PRIMARY KEY</th><th>UNIQUE</th></tr></thead>
+        <tbody>
+          <tr><td>Allows NULL?</td><td><span class="tag tag-red">No</span></td><td><span class="tag tag-green">Yes (usually)</span></td></tr>
+          <tr><td>Per table</td><td>Only ONE</td><td>Multiple allowed</td></tr>
+          <tr><td>Duplicate values</td><td><span class="tag tag-red">Not allowed</span></td><td><span class="tag tag-red">Not allowed</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CHECK -->
+    <div class="topic-section">
+      <span class="section-anchor" id="check"></span>
+      <div class="section-header">
+        <div class="section-num">9</div>
+        <h2>CHECK Constraint</h2>
+      </div>
+      <p><strong>When to use:</strong> When you want to limit the range or type of values allowed in a column.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — CHECK Constraint</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">CREATE TABLE</span> <span class="tbl">PRODUCTS</span> (
+    <span class="col">ProductID</span>  <span class="kw">INT</span>            <span class="kw">PRIMARY KEY</span>,
+    <span class="col">ProductName</span> <span class="kw">VARCHAR</span>(<span class="num">100</span>)  <span class="kw">NOT NULL</span>,
+    <span class="col">Price</span>      <span class="kw">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>)  <span class="kw">CHECK</span> (<span class="col">Price</span> <span class="op">></span> <span class="num">0</span>),       <span class="cmt">-- Must be positive</span>
+    <span class="col">Category</span>   <span class="kw">VARCHAR</span>(<span class="num">20</span>)   <span class="kw">CHECK</span> (<span class="col">Category</span> <span class="kw">IN</span> (<span class="str">'Electronics'</span>, <span class="str">'Books'</span>, <span class="str">'Clothing'</span>)),
+    <span class="col">Stock</span>      <span class="kw">INT</span>            <span class="kw">CHECK</span> (<span class="col">Stock</span> <span class="op">>=</span> <span class="num">0</span>)      <span class="cmt">-- Cannot be negative</span>
+);</code></pre>
+      </div>
+
+      <div class="info-box tip">
+        <div class="info-title">💡 Tip</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">You can use any valid boolean expression in a CHECK constraint, including <code>AND</code>, <code>OR</code>, <code>BETWEEN</code>, and <code>LIKE</code>.</p>
+      </div>
+    </div>
+
+    <!-- DEFAULT -->
+    <div class="topic-section">
+      <span class="section-anchor" id="default"></span>
+      <div class="section-header">
+        <div class="section-num">10</div>
+        <h2>DEFAULT Constraint</h2>
+      </div>
+      <p><strong>When to use:</strong> When you want a column to automatically get a specific value if no value is provided during INSERT.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — DEFAULT Constraint</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">CREATE TABLE</span> <span class="tbl">ORDERS</span> (
+    <span class="col">OrderID</span>    <span class="kw">INT</span>          <span class="kw">PRIMARY KEY</span>,
+    <span class="col">CustomerID</span> <span class="kw">INT</span>          <span class="kw">NOT NULL</span>,
+    <span class="col">OrderDate</span>  <span class="kw">DATE</span>         <span class="kw">DEFAULT</span> <span class="fn">CURRENT_DATE</span>,   <span class="cmt">-- Defaults to today's date</span>
+    <span class="col">Status</span>     <span class="kw">VARCHAR</span>(<span class="num">20</span>)  <span class="kw">DEFAULT</span> <span class="str">'Pending'</span>,        <span class="cmt">-- Defaults to 'Pending'</span>
+    <span class="col">Discount</span>   <span class="kw">DECIMAL</span>(<span class="num">5</span>,<span class="num">2</span>) <span class="kw">DEFAULT</span> <span class="num">0.00</span>             <span class="cmt">-- Defaults to 0</span>
+);
+
+<span class="cmt">-- Insert without providing Status and Discount:</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">ORDERS</span> (<span class="col">OrderID</span>, <span class="col">CustomerID</span>) <span class="kw">VALUES</span> (<span class="num">1</span>, <span class="num">501</span>);</code></pre>
+      </div>
+
+      <div class="result-label">Result: ORDERS table after INSERT</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>OrderID</th><th>CustomerID</th><th>OrderDate</th><th>Status</th><th>Discount</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>501</td><td class="highlight-val">[Today's Date]</td><td class="highlight-val">Pending</td><td class="highlight-val">0.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Constraints Summary</div>
+        <ul>
+          <li><code>NOT NULL</code> — Column must always have a value.</li>
+          <li><code>UNIQUE</code> — All values in the column must be distinct.</li>
+          <li><code>PRIMARY KEY</code> — Unique + Not Null; identifies each row.</li>
+          <li><code>FOREIGN KEY</code> — Links to another table's primary key.</li>
+          <li><code>CHECK</code> — Custom condition that column values must satisfy.</li>
+          <li><code>DEFAULT</code> — Fallback value when none is provided.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+
+  <div class="page-nav-footer">
+    <a href="part1-normalization.html" class="nav-link-card">
+      <div class="nlc-arrow">←</div>
+      <div>
+        <div class="nlc-label">Chapter 1</div>
+        <div class="nlc-title">Normalization</div>
+      </div>
+    </a>
+    <a href="part3-ddl-dml-tcl.html" class="nav-link-card next">
+      <div class="nlc-arrow">→</div>
+      <div>
+        <div class="nlc-label">Chapter 3</div>
+        <div class="nlc-title">DDL · DML · TCL</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<button class="back-to-top" id="backToTop">↑</button>
+<script src="nav.js"></script>
+<script>buildSidebar('part2-keys-constraints.html');</script>
+</body>
+</html>

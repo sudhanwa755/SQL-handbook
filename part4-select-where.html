@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SELECT, WHERE, ORDER BY, LIKE — HSQLDB Handbook</title>
+<meta name="description" content="Master SQL data retrieval: SELECT, DISTINCT, WHERE with all operators, AND/OR logic with brackets, BETWEEN, IN, IS NULL, LIKE pattern matching, and ORDER BY." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-content">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <a href="index.html" class="crumb">Home</a>
+      <span class="sep">›</span>
+      <span class="crumb">Part 2</span>
+      <span class="sep">›</span>
+      <span class="crumb-current">SELECT · WHERE · ORDER BY</span>
+    </div>
+    <div class="topbar-actions">
+      <a href="part5-functions.html" class="btn btn-primary">Next Chapter →</a>
+    </div>
+  </header>
+
+  <div class="content-area">
+
+    <div class="page-header">
+      <div class="part-badge">🔍 Part 2 · Chapter 4</div>
+      <h1 class="page-title">SELECT · WHERE · ORDER BY</h1>
+      <p class="page-subtitle">
+        The art of retrieving exactly the data you need. From basic column selection to complex multi-condition filtering, 
+        pattern matching, and precise sorting — this chapter covers it all.
+      </p>
+      <div class="page-meta">
+        <div class="meta-item"><span class="meta-icon">⏱</span> ~35 min read</div>
+        <div class="meta-item"><span class="meta-icon">🎯</span> Beginner–Intermediate</div>
+        <div class="meta-item"><span class="meta-icon">📋</span> 14 sections</div>
+      </div>
+    </div>
+
+    <!-- SAMPLE DATA -->
+    <div class="topic-section">
+      <div class="section-header">
+        <div class="section-num">⬛</div>
+        <h2>Sample Database for This Chapter</h2>
+      </div>
+      <p>We'll use this <code>EMPLOYEES</code> table throughout all examples. Study it carefully.</p>
+      <div class="result-label">Table: EMPLOYEES (used in all examples below)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th><th>Dept</th><th>City</th><th>Salary</th><th>JoinDate</th><th>Commission</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice Johnson</td><td>IT</td><td>Mumbai</td><td>85000</td><td>2020-03-15</td><td>5000</td></tr>
+            <tr><td>E02</td><td>Bob Smith</td><td>HR</td><td>Delhi</td><td>55000</td><td>2019-07-01</td><td class="null-val">NULL</td></tr>
+            <tr><td>E03</td><td>Carol Wang</td><td>IT</td><td>Mumbai</td><td>92000</td><td>2021-01-10</td><td>8000</td></tr>
+            <tr><td>E04</td><td>David Kumar</td><td>Finance</td><td>Bangalore</td><td>78000</td><td>2018-11-20</td><td class="null-val">NULL</td></tr>
+            <tr><td>E05</td><td>Eva Martinez</td><td>HR</td><td>Delhi</td><td>62000</td><td>2022-05-05</td><td>3500</td></tr>
+            <tr><td>E06</td><td>Frank Lee</td><td>Finance</td><td>Mumbai</td><td>95000</td><td>2017-09-30</td><td class="null-val">NULL</td></tr>
+            <tr><td>E07</td><td>Grace Park</td><td>IT</td><td>Bangalore</td><td>70000</td><td>2023-02-14</td><td>2000</td></tr>
+            <tr><td>E08</td><td>Henry Brown</td><td>HR</td><td>Mumbai</td><td>48000</td><td>2021-08-22</td><td class="null-val">NULL</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SELECT -->
+    <div class="topic-section">
+      <span class="section-anchor" id="select"></span>
+      <div class="section-header">
+        <div class="section-num">4.1</div>
+        <h2>SELECT — Retrieving Data</h2>
+      </div>
+      <p><strong>When to use:</strong> To read/retrieve data from one or more tables.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — SELECT Examples</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Select all columns (*)</span>
+<span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>;
+
+<span class="cmt">-- Select specific columns</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Dept</span>, <span class="col">Salary</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>;
+
+<span class="cmt">-- Use column aliases (AS) for cleaner output</span>
+<span class="kw">SELECT</span>
+    <span class="col">EmpName</span>  <span class="kw">AS</span> <span class="str">"Employee Name"</span>,
+    <span class="col">Salary</span>   <span class="kw">AS</span> <span class="str">"Monthly Pay"</span>,
+    <span class="col">Dept</span>     <span class="kw">AS</span> <span class="str">"Department"</span>
+<span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>;
+
+<span class="cmt">-- Computed column (annual salary)</span>
+<span class="kw">SELECT</span>
+    <span class="col">EmpName</span>,
+    <span class="col">Salary</span>,
+    <span class="col">Salary</span> <span class="op">*</span> <span class="num">12</span> <span class="kw">AS</span> AnnualSalary
+<span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: Computed column query</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Salary</th><th>AnnualSalary</th></tr></thead>
+          <tbody>
+            <tr><td>Alice Johnson</td><td>85000</td><td class="highlight-val">1020000</td></tr>
+            <tr><td>Bob Smith</td><td>55000</td><td class="highlight-val">660000</td></tr>
+            <tr><td>Carol Wang</td><td>92000</td><td class="highlight-val">1104000</td></tr>
+            <tr><td>David Kumar</td><td>78000</td><td class="highlight-val">936000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DISTINCT -->
+    <div class="topic-section">
+      <span class="section-anchor" id="distinct"></span>
+      <div class="section-header">
+        <div class="section-num">4.2</div>
+        <h2>DISTINCT — Removing Duplicates</h2>
+      </div>
+      <p><strong>When to use:</strong> To see only unique values in a column — removes duplicate rows from the result.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — DISTINCT</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- How many unique departments exist?</span>
+<span class="kw">SELECT DISTINCT</span> <span class="col">Dept</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>;
+
+<span class="cmt">-- Unique city-department combinations</span>
+<span class="kw">SELECT DISTINCT</span> <span class="col">City</span>, <span class="col">Dept</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: SELECT DISTINCT Dept</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>Dept</th></tr></thead>
+          <tbody>
+            <tr><td>IT</td></tr>
+            <tr><td>HR</td></tr>
+            <tr><td>Finance</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WHERE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="where"></span>
+      <div class="section-header">
+        <div class="section-num">4.3</div>
+        <h2>WHERE — Filtering Rows</h2>
+      </div>
+      <p><strong>When to use:</strong> To filter which rows are returned. Only rows where the condition is TRUE are included.</p>
+
+      <h3>All Comparison Operators</h3>
+      <table class="compare-table">
+        <thead><tr><th>Operator</th><th>Meaning</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><code>=</code></td><td>Equal to</td><td><code>WHERE Dept = 'IT'</code></td></tr>
+          <tr><td><code>!= or &lt;&gt;</code></td><td>Not equal to</td><td><code>WHERE Dept != 'HR'</code></td></tr>
+          <tr><td><code>&gt;</code></td><td>Greater than</td><td><code>WHERE Salary &gt; 70000</code></td></tr>
+          <tr><td><code>&lt;</code></td><td>Less than</td><td><code>WHERE Salary &lt; 60000</code></td></tr>
+          <tr><td><code>&gt;=</code></td><td>Greater than or equal</td><td><code>WHERE Salary &gt;= 85000</code></td></tr>
+          <tr><td><code>&lt;=</code></td><td>Less than or equal</td><td><code>WHERE Salary &lt;= 70000</code></td></tr>
+        </tbody>
+      </table>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — WHERE with comparison operators</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Get all IT employees with salary above 80000</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Dept</span>, <span class="col">Salary</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">Dept</span> <span class="op">=</span> <span class="str">'IT'</span>
+  <span class="kw">AND</span>  <span class="col">Salary</span> <span class="op">></span> <span class="num">80000</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Dept</th><th>Salary</th></tr></thead>
+          <tbody>
+            <tr><td>Alice Johnson</td><td>IT</td><td>85000</td></tr>
+            <tr><td>Carol Wang</td><td>IT</td><td>92000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AND OR BRACKETS -->
+    <div class="topic-section">
+      <span class="section-anchor" id="and-or-brackets"></span>
+      <div class="section-header">
+        <div class="section-num">4.4</div>
+        <h2>AND / OR Logic — Brackets vs Bracket-less</h2>
+      </div>
+
+      <p>This is one of the most common sources of bugs in SQL. Understanding operator precedence is critical.</p>
+
+      <div class="info-box note">
+        <div class="info-title">📘 Operator Precedence Rule</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">
+          <strong>AND is evaluated BEFORE OR</strong>, just like multiplication before addition in math.<br/>
+          <code>A OR B AND C</code> means <code>A OR (B AND C)</code>
+        </p>
+      </div>
+
+      <h3>Example: The Problem with No Brackets</h3>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Bracket-less (might give wrong results!)</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- INTENT: Get IT or HR employees from Mumbai</span>
+<span class="cmt">-- WRONG (no brackets):</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Dept</span>, <span class="col">City</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">Dept</span> <span class="op">=</span> <span class="str">'IT'</span>   <span class="cmt">-- This is read as: IT  OR  (HR AND Mumbai)</span>
+  <span class="kw">OR</span>   <span class="col">Dept</span> <span class="op">=</span> <span class="str">'HR'</span>
+ <span class="kw">AND</span>   <span class="col">City</span> <span class="op">=</span> <span class="str">'Mumbai'</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result — WRONG: Returns ALL IT employees (from any city) + only Mumbai HR employees</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Dept</th><th>City</th></tr></thead>
+          <tbody>
+            <tr><td>Alice Johnson</td><td>IT</td><td>Mumbai</td></tr>
+            <tr><td>Carol Wang</td><td>IT</td><td>Mumbai</td></tr>
+            <tr><td>Grace Park</td><td>IT</td><td class="highlight-val">Bangalore ← not Mumbai!</td></tr>
+            <tr><td>Henry Brown</td><td>HR</td><td>Mumbai</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — With Brackets (CORRECT!)</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- CORRECT: Use brackets to group OR first</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Dept</span>, <span class="col">City</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  (<span class="col">Dept</span> <span class="op">=</span> <span class="str">'IT'</span> <span class="kw">OR</span> <span class="col">Dept</span> <span class="op">=</span> <span class="str">'HR'</span>)
+  <span class="kw">AND</span>  <span class="col">City</span> <span class="op">=</span> <span class="str">'Mumbai'</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result — CORRECT: IT and HR employees from Mumbai only</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Dept</th><th>City</th></tr></thead>
+          <tbody>
+            <tr><td>Alice Johnson</td><td>IT</td><td>Mumbai</td></tr>
+            <tr><td>Carol Wang</td><td>IT</td><td>Mumbai</td></tr>
+            <tr><td>Henry Brown</td><td>HR</td><td>Mumbai</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Golden Rule</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">When mixing AND and OR — <strong>always use brackets</strong> to be explicit. Even if technically not needed, brackets make your intent clear and prevent bugs.</p>
+      </div>
+    </div>
+
+    <!-- BETWEEN -->
+    <div class="topic-section">
+      <span class="section-anchor" id="between"></span>
+      <div class="section-header">
+        <div class="section-num">4.5</div>
+        <h2>BETWEEN — Range Filtering</h2>
+      </div>
+      <p><strong>When to use:</strong> To filter rows where a column's value is within an inclusive range.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — BETWEEN</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Employees earning between 60000 and 85000 (inclusive)</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Salary</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">Salary</span> <span class="kw">BETWEEN</span> <span class="num">60000</span> <span class="kw">AND</span> <span class="num">85000</span>;
+
+<span class="cmt">-- Employees who joined in 2021</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">JoinDate</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">JoinDate</span> <span class="kw">BETWEEN</span> <span class="str">'2021-01-01'</span> <span class="kw">AND</span> <span class="str">'2021-12-31'</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: Salary BETWEEN 60000 AND 85000</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Salary</th></tr></thead>
+          <tbody>
+            <tr><td>Alice Johnson</td><td>85000</td></tr>
+            <tr><td>Eva Martinez</td><td>62000</td></tr>
+            <tr><td>Grace Park</td><td>70000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- IN -->
+    <div class="topic-section">
+      <span class="section-anchor" id="in"></span>
+      <div class="section-header">
+        <div class="section-num">4.6</div>
+        <h2>IN — Matching a List of Values</h2>
+      </div>
+      <p><strong>When to use:</strong> To filter rows where a column's value matches any value in a specified list. More concise than multiple OR conditions.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — IN operator</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Get employees from IT or Finance departments</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Dept</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">Dept</span> <span class="kw">IN</span> (<span class="str">'IT'</span>, <span class="str">'Finance'</span>);
+
+<span class="cmt">-- NOT IN: Exclude certain cities</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">City</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">City</span> <span class="kw">NOT IN</span> (<span class="str">'Mumbai'</span>, <span class="str">'Delhi'</span>);</code></pre>
+      </div>
+
+      <div class="result-label">Result: Dept IN ('IT', 'Finance')</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Dept</th></tr></thead>
+          <tbody>
+            <tr><td>Alice Johnson</td><td>IT</td></tr>
+            <tr><td>Carol Wang</td><td>IT</td></tr>
+            <tr><td>David Kumar</td><td>Finance</td></tr>
+            <tr><td>Frank Lee</td><td>Finance</td></tr>
+            <tr><td>Grace Park</td><td>IT</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- IS NULL -->
+    <div class="topic-section">
+      <span class="section-anchor" id="is-null"></span>
+      <div class="section-header">
+        <div class="section-num">4.7</div>
+        <h2>IS NULL / IS NOT NULL</h2>
+      </div>
+      <p><strong>When to use:</strong> To find rows where a column has no value (NULL).</p>
+
+      <div class="info-box warning">
+        <div class="info-title">⚠️ Critical Point</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">You <strong>cannot</strong> use <code>= NULL</code> or <code>!= NULL</code>. NULL is not a value — it's the <em>absence</em> of a value. Always use <code>IS NULL</code> or <code>IS NOT NULL</code>.</p>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — IS NULL / IS NOT NULL</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Employees who have no commission (NULL)</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Commission</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">Commission</span> <span class="kw">IS NULL</span>;
+
+<span class="cmt">-- Employees who DO have a commission</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Commission</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">Commission</span> <span class="kw">IS NOT NULL</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: Commission IS NULL</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Commission</th></tr></thead>
+          <tbody>
+            <tr><td>Bob Smith</td><td class="null-val">NULL</td></tr>
+            <tr><td>David Kumar</td><td class="null-val">NULL</td></tr>
+            <tr><td>Frank Lee</td><td class="null-val">NULL</td></tr>
+            <tr><td>Henry Brown</td><td class="null-val">NULL</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LIKE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="like"></span>
+      <div class="section-header">
+        <div class="section-num">4.8</div>
+        <h2>LIKE — Pattern Matching</h2>
+      </div>
+      <p><strong>When to use:</strong> To filter text data based on a pattern, not an exact value.</p>
+
+      <h3>Wildcards</h3>
+      <table class="compare-table">
+        <thead><tr><th>Wildcard</th><th>Meaning</th><th>Example</th><th>Matches</th></tr></thead>
+        <tbody>
+          <tr><td><code>%</code></td><td>Any sequence of 0 or more characters</td><td><code>LIKE 'A%'</code></td><td>Alice, Amit, A, Abc123</td></tr>
+          <tr><td><code>%</code></td><td>End pattern</td><td><code>LIKE '%son'</code></td><td>Alice Johnson, Mason</td></tr>
+          <tr><td><code>%</code></td><td>Anywhere</td><td><code>LIKE '%ar%'</code></td><td>Carol, Martinez, Gary</td></tr>
+          <tr><td><code>_</code></td><td>Any single character</td><td><code>LIKE '_ob'</code></td><td>Bob, Rob, Job</td></tr>
+          <tr><td><code>_</code></td><td>Fixed position</td><td><code>LIKE 'E0_'</code></td><td>E01, E02, E09</td></tr>
+        </tbody>
+      </table>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — LIKE with all patterns</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Names starting with 'A'</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">EmpName</span> <span class="kw">LIKE</span> <span class="str">'A%'</span>;
+
+<span class="cmt">-- Names ending with 'ar'</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">EmpName</span> <span class="kw">LIKE</span> <span class="str">'%ar'</span>;
+
+<span class="cmt">-- Names containing 'ar' anywhere</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">EmpName</span> <span class="kw">LIKE</span> <span class="str">'%ar%'</span>;
+
+<span class="cmt">-- Names with exactly 3 characters before a space</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">EmpName</span> <span class="kw">LIKE</span> <span class="str">'___ %'</span>;  <span class="cmt">-- Three underscores then space then anything</span>
+
+<span class="cmt">-- NOT LIKE: Names that do NOT start with 'A'</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">EmpName</span> <span class="kw">NOT LIKE</span> <span class="str">'A%'</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: EmpName LIKE '%ar%' (contains 'ar')</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th></tr></thead>
+          <tbody>
+            <tr><td>Carol W<span class="match-val">ar</span>g</td></tr>
+            <tr><td>Eva M<span class="match-val">ar</span>tinez</td></tr>
+            <tr><td>Gr<span class="match-val">ar</span>ce P<span class="match-val">ar</span>k</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box mistakes">
+        <div class="info-title">⚠️ Mistakes to Avoid</div>
+        <ul>
+          <li>Using <code>LIKE 'Alice'</code> without wildcards — this is exactly like using <code>= 'Alice'</code>. Use wildcards for pattern matching.</li>
+          <li>Overusing <code>%term%</code> on large tables — it can be very slow as it prevents index use. Use full-text search for large datasets.</li>
+          <li>Confusing <code>%</code> (any chars) with <code>_</code> (exactly one char).</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ORDER BY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="order-by"></span>
+      <div class="section-header">
+        <div class="section-num">4.9</div>
+        <h2>ORDER BY — Sorting Results</h2>
+      </div>
+      <p><strong>When to use:</strong> To sort the result set by one or more columns. Default is ascending (ASC).</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — ORDER BY Examples</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Sort by Salary high to low</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Salary</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">ORDER BY</span> <span class="col">Salary</span> <span class="kw">DESC</span>;
+
+<span class="cmt">-- Sort by Department ascending, then Salary descending</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Dept</span>, <span class="col">Salary</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">ORDER BY</span> <span class="col">Dept</span> <span class="kw">ASC</span>, <span class="col">Salary</span> <span class="kw">DESC</span>;
+
+<span class="cmt">-- Order by column position (2nd column)</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Salary</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">ORDER BY</span> <span class="num">2</span> <span class="kw">DESC</span>;  <span class="cmt">-- 2nd column = Salary</span>
+
+<span class="cmt">-- NULLs: In HSQLDB, NULLs sort first in ASC by default</span>
+<span class="cmt">-- Use NULLS LAST to push NULLs to the end</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Commission</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">ORDER BY</span> <span class="col">Commission</span> <span class="kw">ASC NULLS LAST</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: ORDER BY Dept ASC, Salary DESC</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Dept</th><th>Salary</th></tr></thead>
+          <tbody>
+            <tr><td>Frank Lee</td><td>Finance</td><td>95000</td></tr>
+            <tr><td>David Kumar</td><td>Finance</td><td>78000</td></tr>
+            <tr><td>Eva Martinez</td><td>HR</td><td>62000</td></tr>
+            <tr><td>Bob Smith</td><td>HR</td><td>55000</td></tr>
+            <tr><td>Henry Brown</td><td>HR</td><td>48000</td></tr>
+            <tr><td>Carol Wang</td><td>IT</td><td>92000</td></tr>
+            <tr><td>Alice Johnson</td><td>IT</td><td>85000</td></tr>
+            <tr><td>Grace Park</td><td>IT</td><td>70000</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 ORDER BY Key Points</div>
+        <ul>
+          <li>Multiple columns: separated by comma. Left-to-right priority.</li>
+          <li>Default is <code>ASC</code> — you can omit it.</li>
+          <li><code>ORDER BY</code> is always the last clause in a SELECT query.</li>
+          <li>Execution order: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY</li>
+        </ul>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+
+  <div class="page-nav-footer">
+    <a href="part3-ddl-dml-tcl.html" class="nav-link-card">
+      <div class="nlc-arrow">←</div>
+      <div>
+        <div class="nlc-label">Chapter 3</div>
+        <div class="nlc-title">DDL · DML · TCL</div>
+      </div>
+    </a>
+    <a href="part5-functions.html" class="nav-link-card next">
+      <div class="nlc-arrow">→</div>
+      <div>
+        <div class="nlc-label">Chapter 5</div>
+        <div class="nlc-title">NULL · Functions · CAST</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<button class="back-to-top" id="backToTop">↑</button>
+<script src="nav.js"></script>
+<script>buildSidebar('part4-select-where.html');</script>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GROUP BY & HAVING — HSQLDB Handbook</title>
+<meta name="description" content="Complete guide to GROUP BY, aggregate functions (COUNT, SUM, AVG, MIN, MAX), HAVING clause, and the exact difference between WHERE and HAVING with examples." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-content">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <a href="index.html" class="crumb">Home</a>
+      <span class="sep">›</span>
+      <span class="crumb">Part 3</span>
+      <span class="sep">›</span>
+      <span class="crumb-current">GROUP BY · HAVING</span>
+    </div>
+    <div class="topbar-actions">
+      <a href="part7-joins.html" class="btn btn-primary">Next Chapter →</a>
+    </div>
+  </header>
+
+  <div class="content-area">
+
+    <div class="page-header">
+      <div class="part-badge">📊 Part 3 · Chapter 6</div>
+      <h1 class="page-title">GROUP BY & HAVING</h1>
+      <p class="page-subtitle">
+        Aggregation transforms raw rows into meaningful summaries. <code>GROUP BY</code> organizes rows into groups, 
+        aggregate functions compute values for each group, and <code>HAVING</code> filters those groups. 
+        This chapter also definitively answers: <strong>WHERE vs HAVING — when to use which?</strong>
+      </p>
+      <div class="page-meta">
+        <div class="meta-item"><span class="meta-icon">⏱</span> ~25 min read</div>
+        <div class="meta-item"><span class="meta-icon">🎯</span> Intermediate</div>
+        <div class="meta-item"><span class="meta-icon">📋</span> 10 sections</div>
+      </div>
+    </div>
+
+    <!-- SAMPLE DATA -->
+    <div class="topic-section">
+      <div class="section-header">
+        <div class="section-num">⬛</div>
+        <h2>Sample Table for This Chapter</h2>
+      </div>
+      <div class="result-label">Table: EMPLOYEES (extended)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th><th>Dept</th><th>City</th><th>Salary</th><th>Commission</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice Johnson</td><td>IT</td><td>Mumbai</td><td>85000</td><td>5000</td></tr>
+            <tr><td>E02</td><td>Bob Smith</td><td>HR</td><td>Delhi</td><td>55000</td><td class="null-val">NULL</td></tr>
+            <tr><td>E03</td><td>Carol Wang</td><td>IT</td><td>Mumbai</td><td>92000</td><td>8000</td></tr>
+            <tr><td>E04</td><td>David Kumar</td><td>Finance</td><td>Bangalore</td><td>78000</td><td class="null-val">NULL</td></tr>
+            <tr><td>E05</td><td>Eva Martinez</td><td>HR</td><td>Delhi</td><td>62000</td><td>3500</td></tr>
+            <tr><td>E06</td><td>Frank Lee</td><td>Finance</td><td>Mumbai</td><td>95000</td><td class="null-val">NULL</td></tr>
+            <tr><td>E07</td><td>Grace Park</td><td>IT</td><td>Bangalore</td><td>70000</td><td>2000</td></tr>
+            <tr><td>E08</td><td>Henry Brown</td><td>HR</td><td>Mumbai</td><td>48000</td><td class="null-val">NULL</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AGGREGATE FUNCTIONS -->
+    <div class="topic-section">
+      <span class="section-anchor" id="aggregate"></span>
+      <div class="section-header">
+        <div class="section-num">6.1</div>
+        <h2>Aggregate Functions</h2>
+      </div>
+      <p>Aggregate functions compute a <strong>single summary value</strong> from multiple rows.</p>
+
+      <table class="compare-table">
+        <thead><tr><th>Function</th><th>What it does</th><th>NULL handling</th></tr></thead>
+        <tbody>
+          <tr><td><code>COUNT(*)</code></td><td>Counts ALL rows (including NULLs)</td><td>Includes NULLs</td></tr>
+          <tr><td><code>COUNT(col)</code></td><td>Counts rows where col is NOT NULL</td><td>Ignores NULLs</td></tr>
+          <tr><td><code>SUM(col)</code></td><td>Total sum of numeric column</td><td>Ignores NULLs</td></tr>
+          <tr><td><code>AVG(col)</code></td><td>Average of numeric column</td><td>Ignores NULLs</td></tr>
+          <tr><td><code>MIN(col)</code></td><td>Smallest value</td><td>Ignores NULLs</td></tr>
+          <tr><td><code>MAX(col)</code></td><td>Largest value</td><td>Ignores NULLs</td></tr>
+        </tbody>
+      </table>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Aggregate Functions (no GROUP BY yet)</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(<span class="op">*</span>)           <span class="kw">AS</span> TotalEmployees,      <span class="cmt">-- 8</span>
+    <span class="fn">COUNT</span>(<span class="col">Commission</span>)  <span class="kw">AS</span> WithCommission,      <span class="cmt">-- 4 (NULLs ignored)</span>
+    <span class="fn">SUM</span>(<span class="col">Salary</span>)        <span class="kw">AS</span> TotalSalary,          <span class="cmt">-- 585000</span>
+    <span class="fn">AVG</span>(<span class="col">Salary</span>)        <span class="kw">AS</span> AvgSalary,            <span class="cmt">-- 73125</span>
+    <span class="fn">MIN</span>(<span class="col">Salary</span>)        <span class="kw">AS</span> MinSalary,            <span class="cmt">-- 48000</span>
+    <span class="fn">MAX</span>(<span class="col">Salary</span>)        <span class="kw">AS</span> MaxSalary             <span class="cmt">-- 95000</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: Aggregates over the whole table</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>TotalEmployees</th><th>WithCommission</th><th>TotalSalary</th><th>AvgSalary</th><th>MinSalary</th><th>MaxSalary</th></tr></thead>
+          <tbody>
+            <tr><td>8</td><td>4</td><td>585000</td><td>73125</td><td>48000</td><td>95000</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box warning">
+        <div class="info-title">⚠️ AVG and NULL</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;"><code>AVG(Commission)</code> divides the SUM by the count of non-NULL values (4), not by total rows (8). This is often what you want — but be aware of it!</p>
+      </div>
+    </div>
+
+    <!-- GROUP BY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="group-by"></span>
+      <div class="section-header">
+        <div class="section-num">6.2</div>
+        <h2>GROUP BY — Aggregating by Category</h2>
+      </div>
+      <p><strong>When to use:</strong> When you want to calculate aggregate values for <em>each group/category</em> separately.</p>
+
+      <div class="info-box note">
+        <div class="info-title">📘 The Golden Rule of GROUP BY</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">Every column in your SELECT clause must either be (a) in the GROUP BY clause, or (b) wrapped in an aggregate function. Nothing else is allowed.</p>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — GROUP BY basic</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Count employees, total salary, and avg salary per department</span>
+<span class="kw">SELECT</span>
+    <span class="col">Dept</span>,
+    <span class="fn">COUNT</span>(<span class="op">*</span>)    <span class="kw">AS</span> EmpCount,
+    <span class="fn">SUM</span>(<span class="col">Salary</span>) <span class="kw">AS</span> TotalSalary,
+    <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="kw">AS</span> AvgSalary,
+    <span class="fn">MAX</span>(<span class="col">Salary</span>) <span class="kw">AS</span> TopSalary
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">GROUP BY</span> <span class="col">Dept</span>
+<span class="kw">ORDER BY</span> <span class="fn">SUM</span>(<span class="col">Salary</span>) <span class="kw">DESC</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: GROUP BY Dept</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>Dept</th><th>EmpCount</th><th>TotalSalary</th><th>AvgSalary</th><th>TopSalary</th></tr></thead>
+          <tbody>
+            <tr><td>Finance</td><td>2</td><td>173000</td><td>86500.0</td><td>95000</td></tr>
+            <tr><td>IT</td><td>3</td><td>247000</td><td>82333.3</td><td>92000</td></tr>
+            <tr><td>HR</td><td>3</td><td>165000</td><td>55000.0</td><td>62000</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>GROUP BY Multiple Columns</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — GROUP BY multiple columns</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Count employees per Dept per City</span>
+<span class="kw">SELECT</span>
+    <span class="col">Dept</span>,
+    <span class="col">City</span>,
+    <span class="fn">COUNT</span>(<span class="op">*</span>)    <span class="kw">AS</span> EmpCount,
+    <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="kw">AS</span> AvgSalary
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">GROUP BY</span> <span class="col">Dept</span>, <span class="col">City</span>
+<span class="kw">ORDER BY</span> <span class="col">Dept</span>, <span class="col">City</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: GROUP BY Dept, City</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>Dept</th><th>City</th><th>EmpCount</th><th>AvgSalary</th></tr></thead>
+          <tbody>
+            <tr><td>Finance</td><td>Bangalore</td><td>1</td><td>78000.0</td></tr>
+            <tr><td>Finance</td><td>Mumbai</td><td>1</td><td>95000.0</td></tr>
+            <tr><td>HR</td><td>Delhi</td><td>2</td><td>58500.0</td></tr>
+            <tr><td>HR</td><td>Mumbai</td><td>1</td><td>48000.0</td></tr>
+            <tr><td>IT</td><td>Bangalore</td><td>1</td><td>70000.0</td></tr>
+            <tr><td>IT</td><td>Mumbai</td><td>2</td><td>88500.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- HAVING -->
+    <div class="topic-section">
+      <span class="section-anchor" id="having"></span>
+      <div class="section-header">
+        <div class="section-num">6.3</div>
+        <h2>HAVING — Filtering Aggregated Groups</h2>
+      </div>
+      <p><strong>When to use:</strong> To filter <em>groups</em> after aggregation — i.e., to filter based on aggregate function results.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — HAVING Clause</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Show only departments with more than 2 employees</span>
+<span class="kw">SELECT</span>
+    <span class="col">Dept</span>,
+    <span class="fn">COUNT</span>(<span class="op">*</span>)    <span class="kw">AS</span> EmpCount,
+    <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="kw">AS</span> AvgSalary
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">GROUP BY</span> <span class="col">Dept</span>
+<span class="kw">HAVING</span>   <span class="fn">COUNT</span>(<span class="op">*</span>) <span class="op">></span> <span class="num">2</span>;   <span class="cmt">-- Filter after grouping</span>
+
+<span class="cmt">-- Departments where avg salary exceeds 70000</span>
+<span class="kw">SELECT</span>
+    <span class="col">Dept</span>,
+    <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="kw">AS</span> AvgSalary
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">GROUP BY</span> <span class="col">Dept</span>
+<span class="kw">HAVING</span>   <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="op">></span> <span class="num">70000</span>
+<span class="kw">ORDER BY</span> <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="kw">DESC</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: Departments where AVG(Salary) > 70000</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>Dept</th><th>AvgSalary</th></tr></thead>
+          <tbody>
+            <tr><td>Finance</td><td class="highlight-val">86500.0</td></tr>
+            <tr><td>IT</td><td class="highlight-val">82333.3</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WHERE vs HAVING -->
+    <div class="topic-section">
+      <span class="section-anchor" id="where-vs-having"></span>
+      <div class="section-header">
+        <div class="section-num">6.4</div>
+        <h2>WHERE vs HAVING — The Definitive Answer</h2>
+      </div>
+
+      <table class="compare-table">
+        <thead>
+          <tr><th>Feature</th><th>WHERE</th><th>HAVING</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Filters</td>
+            <td>Individual <strong>rows</strong></td>
+            <td>Grouped <strong>groups</strong></td>
+          </tr>
+          <tr>
+            <td>When it runs</td>
+            <td><strong>Before</strong> GROUP BY (on raw rows)</td>
+            <td><strong>After</strong> GROUP BY (on grouped result)</td>
+          </tr>
+          <tr>
+            <td>Can use aggregate functions?</td>
+            <td><span class="tag tag-red">NO — e.g., WHERE SUM(...) is INVALID</span></td>
+            <td><span class="tag tag-green">YES — e.g., HAVING SUM(...) > 1000</span></td>
+          </tr>
+          <tr>
+            <td>Can use regular columns?</td>
+            <td><span class="tag tag-green">YES</span></td>
+            <td><span class="tag tag-green">YES (if in GROUP BY)</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Execution Order of a SELECT Query</h3>
+      <div class="step-list">
+        <div class="step-item"><div class="step-num">1</div><div class="step-content"><code>FROM</code> — Which table?</div></div>
+        <div class="step-item"><div class="step-num">2</div><div class="step-content"><code>WHERE</code> — Filter individual rows before grouping</div></div>
+        <div class="step-item"><div class="step-num">3</div><div class="step-content"><code>GROUP BY</code> — Group the remaining rows</div></div>
+        <div class="step-item"><div class="step-num">4</div><div class="step-content"><code>HAVING</code> — Filter the groups</div></div>
+        <div class="step-item"><div class="step-num">5</div><div class="step-content"><code>SELECT</code> — Choose which columns to display</div></div>
+        <div class="step-item"><div class="step-num">6</div><div class="step-content"><code>ORDER BY</code> — Sort the final result</div></div>
+      </div>
+
+      <h3>Example: Using WHERE + GROUP BY + HAVING Together</h3>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — WHERE + GROUP BY + HAVING</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Among IT and Finance employees (WHERE),</span>
+<span class="cmt">-- group by department,</span>
+<span class="cmt">-- and show only groups with avg salary > 80000 (HAVING)</span>
+
+<span class="kw">SELECT</span>
+    <span class="col">Dept</span>,
+    <span class="fn">COUNT</span>(<span class="op">*</span>)    <span class="kw">AS</span> EmpCount,
+    <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="kw">AS</span> AvgSalary,
+    <span class="fn">SUM</span>(<span class="col">Salary</span>) <span class="kw">AS</span> TotalSalary
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">Dept</span> <span class="kw">IN</span> (<span class="str">'IT'</span>, <span class="str">'Finance'</span>)   <span class="cmt">-- Step 2: filter rows first</span>
+<span class="kw">GROUP BY</span> <span class="col">Dept</span>                       <span class="cmt">-- Step 3: group them</span>
+<span class="kw">HAVING</span>   <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="op">></span> <span class="num">80000</span>     <span class="cmt">-- Step 4: filter groups</span>
+<span class="kw">ORDER BY</span> <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="kw">DESC</span>;         <span class="cmt">-- Step 6: sort final result</span></code></pre>
+      </div>
+
+      <div class="result-label">Result: WHERE filters to IT & Finance; HAVING keeps only AvgSalary > 80000</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>Dept</th><th>EmpCount</th><th>AvgSalary</th><th>TotalSalary</th></tr></thead>
+          <tbody>
+            <tr><td>Finance</td><td>2</td><td class="highlight-val">86500.0 ✅</td><td>173000</td></tr>
+            <tr><td>IT</td><td>3</td><td class="highlight-val">82333.3 ✅</td><td>247000</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Simple Memory Rule</div>
+        <ul>
+          <li><strong>Use WHERE</strong> to filter on raw column values (before grouping).</li>
+          <li><strong>Use HAVING</strong> to filter on aggregate results (after grouping).</li>
+          <li><strong>WRONG:</strong> <code>WHERE COUNT(*) > 2</code> ← Error! Can't use aggregate in WHERE.</li>
+          <li><strong>CORRECT:</strong> <code>HAVING COUNT(*) > 2</code></li>
+        </ul>
+      </div>
+
+      <div class="info-box mistakes">
+        <div class="info-title">⚠️ Mistakes to Avoid</div>
+        <ul>
+          <li>Using aggregate functions in <code>WHERE</code> — this is a syntax error.</li>
+          <li>Putting columns in SELECT that are neither in GROUP BY nor in an aggregate function.</li>
+          <li>Forgetting that WHERE runs BEFORE grouping — so it cannot see group summaries.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- COUNT DISTINCT -->
+    <div class="topic-section">
+      <span class="section-anchor" id="count-distinct"></span>
+      <div class="section-header">
+        <div class="section-num">6.5</div>
+        <h2>COUNT with DISTINCT</h2>
+      </div>
+      <p><strong>When to use:</strong> To count unique values in a column.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — COUNT DISTINCT</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- How many unique cities are employees from?</span>
+<span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(<span class="op">*</span>)                 <span class="kw">AS</span> TotalRows,          <span class="cmt">-- 8</span>
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> <span class="col">City</span>)    <span class="kw">AS</span> UniqueCities,        <span class="cmt">-- 3</span>
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> <span class="col">Dept</span>)    <span class="kw">AS</span> UniqueDepts          <span class="cmt">-- 3</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>TotalRows</th><th>UniqueCities</th><th>UniqueDepts</th></tr></thead>
+          <tbody>
+            <tr><td>8</td><td>3</td><td>3</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+
+  <div class="page-nav-footer">
+    <a href="part5-functions.html" class="nav-link-card">
+      <div class="nlc-arrow">←</div>
+      <div>
+        <div class="nlc-label">Chapter 5</div>
+        <div class="nlc-title">NULL · Functions · CAST</div>
+      </div>
+    </a>
+    <a href="part7-joins.html" class="nav-link-card next">
+      <div class="nlc-arrow">→</div>
+      <div>
+        <div class="nlc-label">Chapter 7</div>
+        <div class="nlc-title">Joins & Multi-Table</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<button class="back-to-top" id="backToTop">↑</button>
+<script src="nav.js"></script>
+<script>buildSidebar('part6-groupby-having.html');</script>
+</body>
+</html>

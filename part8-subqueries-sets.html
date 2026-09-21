@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Subqueries (Scalar, Multi-row, Correlated, EXISTS) — HSQLDB Handbook</title>
+<meta name="description" content="Master all SQL subquery types: Scalar, Multi-row, Correlated, Uncorrelated, IN, ANY, ALL, EXISTS, NOT EXISTS. Subqueries in SELECT, FROM, and WHERE with full examples." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main-content">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <a href="index.html" class="crumb">Home</a>
+      <span class="sep">›</span>
+      <span class="crumb">Part 4</span>
+      <span class="sep">›</span>
+      <span class="crumb-current">Subqueries & Advanced</span>
+    </div>
+    <div class="topbar-actions">
+      <a href="index.html" class="btn btn-ghost">← Back to Index</a>
+    </div>
+  </header>
+
+  <div class="content-area">
+
+    <div class="page-header">
+      <div class="part-badge">🧩 Part 4 · Chapter 8</div>
+      <h1 class="page-title">Subqueries & Advanced</h1>
+      <p class="page-subtitle">
+        A subquery is a query nested inside another query. It lets you use the results of one query as a condition or value in another. 
+        Master all types — from simple scalar subqueries to complex correlated ones with EXISTS.
+      </p>
+      <div class="page-meta">
+        <div class="meta-item"><span class="meta-icon">⏱</span> ~35 min read</div>
+        <div class="meta-item"><span class="meta-icon">🎯</span> Advanced</div>
+        <div class="meta-item"><span class="meta-icon">📋</span> 10 sections</div>
+      </div>
+    </div>
+
+    <!-- SAMPLE DATA -->
+    <div class="topic-section">
+      <div class="section-header">
+        <div class="section-num">⬛</div>
+        <h2>Sample Tables for This Chapter</h2>
+      </div>
+
+      <div class="result-label">Table: EMPLOYEES</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th><th>Dept</th><th>Salary</th><th>ManagerID</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td><td>IT</td><td>85000</td><td>E03</td></tr>
+            <tr><td>E02</td><td>Bob</td><td>HR</td><td>55000</td><td>E05</td></tr>
+            <tr><td>E03</td><td>Carol</td><td>IT</td><td>92000</td><td class="null-val">NULL</td></tr>
+            <tr><td>E04</td><td>David</td><td>Finance</td><td>78000</td><td>E06</td></tr>
+            <tr><td>E05</td><td>Eva</td><td>HR</td><td>62000</td><td class="null-val">NULL</td></tr>
+            <tr><td>E06</td><td>Frank</td><td>Finance</td><td>95000</td><td class="null-val">NULL</td></tr>
+            <tr><td>E07</td><td>Grace</td><td>IT</td><td>70000</td><td>E03</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="result-label">Table: DEPARTMENTS</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>DeptID</th><th>DeptName</th><th>Budget</th></tr></thead>
+          <tbody>
+            <tr><td>D10</td><td>IT</td><td>500000</td></tr>
+            <tr><td>D20</td><td>HR</td><td>200000</td></tr>
+            <tr><td>D30</td><td>Finance</td><td>350000</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="result-label">Table: SALARYHISTORY</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>PreviousSalary</th><th>ChangeDate</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>75000</td><td>2022-01-01</td></tr>
+            <tr><td>E03</td><td>80000</td><td>2021-06-01</td></tr>
+            <tr><td>E06</td><td>88000</td><td>2022-03-15</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WHAT IS A SUBQUERY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="what-is"></span>
+      <div class="section-header">
+        <div class="section-num">8.0</div>
+        <h2>What Is a Subquery?</h2>
+      </div>
+      <p>A subquery (also called an <strong>inner query</strong> or <strong>nested query</strong>) is a SELECT statement inside another SQL statement. The outer query is called the <strong>main query</strong>.</p>
+      <ul class="styled-list">
+        <li>Subqueries are always enclosed in <strong>parentheses</strong> <code>( )</code>.</li>
+        <li>The inner query executes first, its result is passed to the outer query.</li>
+        <li>Subqueries can appear in the <code>WHERE</code>, <code>SELECT</code>, <code>FROM</code>, and <code>HAVING</code> clauses.</li>
+      </ul>
+    </div>
+
+    <!-- SCALAR SUBQUERY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="scalar"></span>
+      <div class="section-header">
+        <div class="section-num">8.1</div>
+        <h2>Scalar Subquery — Returns ONE Value</h2>
+      </div>
+      <p><strong>When to use:</strong> When you need to compare a column against a single computed value, like the overall average salary.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Scalar Subquery in WHERE</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Find employees earning more than the AVERAGE salary</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Dept</span>, <span class="col">Salary</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">Salary</span> <span class="op">></span> (
+    <span class="kw">SELECT</span> <span class="fn">AVG</span>(<span class="col">Salary</span>)
+    <span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+);
+
+<span class="cmt">-- The inner query returns: 76714.28  (average)
+-- The outer query then runs: WHERE Salary > 76714.28</span></code></pre>
+      </div>
+
+      <div class="result-label">Inner Query Result: AVG(Salary) = 76714.28</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>AVG(Salary)</th></tr></thead>
+          <tbody><tr><td>76714.28</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="result-label">Final Result: Employees earning above average</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Dept</th><th>Salary</th></tr></thead>
+          <tbody>
+            <tr><td>Alice</td><td>IT</td><td>85000</td></tr>
+            <tr><td>Carol</td><td>IT</td><td>92000</td></tr>
+            <tr><td>Frank</td><td>Finance</td><td>95000</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Scalar Subquery in SELECT Clause</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Subquery in SELECT</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Show each employee's salary vs. the average</span>
+<span class="kw">SELECT</span>
+    <span class="col">EmpName</span>,
+    <span class="col">Salary</span>,
+    (<span class="kw">SELECT</span> <span class="fn">ROUND</span>(<span class="fn">AVG</span>(<span class="col">Salary</span>),<span class="num">2</span>) <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>) <span class="kw">AS</span> AvgSalary,
+    <span class="col">Salary</span> <span class="op">-</span> (<span class="kw">SELECT</span> <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>) <span class="kw">AS</span> DiffFromAvg
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: Each salary compared to the overall average</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Salary</th><th>AvgSalary</th><th>DiffFromAvg</th></tr></thead>
+          <tbody>
+            <tr><td>Alice</td><td>85000</td><td>76714.28</td><td class="highlight-val">+8285.72</td></tr>
+            <tr><td>Bob</td><td>55000</td><td>76714.28</td><td class="highlight-val">-21714.28</td></tr>
+            <tr><td>Carol</td><td>92000</td><td>76714.28</td><td class="highlight-val">+15285.72</td></tr>
+            <tr><td>David</td><td>78000</td><td>76714.28</td><td class="highlight-val">+1285.72</td></tr>
+            <tr><td>Eva</td><td>62000</td><td>76714.28</td><td class="highlight-val">-14714.28</td></tr>
+            <tr><td>Frank</td><td>95000</td><td>76714.28</td><td class="highlight-val">+18285.72</td></tr>
+            <tr><td>Grace</td><td>70000</td><td>76714.28</td><td class="highlight-val">-6714.28</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box mistakes">
+        <div class="info-title">⚠️ Mistakes to Avoid</div>
+        <ul>
+          <li>A scalar subquery must return exactly <strong>one row, one column</strong>. If it returns multiple rows, you'll get an error.</li>
+          <li>If the subquery might return NULL, handle it with NVL/COALESCE.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- MULTI-ROW SUBQUERY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="multi-row"></span>
+      <div class="section-header">
+        <div class="section-num">8.2</div>
+        <h2>Multi-Row Subquery — Returns Multiple Values</h2>
+      </div>
+      <p>When a subquery returns <strong>more than one row</strong>, you must use special operators: <code>IN</code>, <code>ANY</code>, or <code>ALL</code>.</p>
+
+      <h3>Using IN</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Multi-row Subquery with IN</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Find employees who are managers (appear in ManagerID column)</span>
+<span class="kw">SELECT</span> <span class="col">EmpID</span>, <span class="col">EmpName</span>, <span class="col">Dept</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">EmpID</span> <span class="kw">IN</span> (
+    <span class="kw">SELECT DISTINCT</span> <span class="col">ManagerID</span>
+    <span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+    <span class="kw">WHERE</span>  <span class="col">ManagerID</span> <span class="kw">IS NOT NULL</span>
+);
+<span class="cmt">-- Inner query returns: (E03, E05, E06)
+-- Outer query finds employees whose EmpID is in that list</span></code></pre>
+      </div>
+
+      <div class="result-label">Result: Employees who are managers</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th><th>Dept</th></tr></thead>
+          <tbody>
+            <tr><td>E03</td><td>Carol</td><td>IT</td></tr>
+            <tr><td>E05</td><td>Eva</td><td>HR</td></tr>
+            <tr><td>E06</td><td>Frank</td><td>Finance</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Using ANY and ALL</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — ANY and ALL</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- ANY: salary greater than AT LEAST ONE HR salary</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Salary</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">Salary</span> <span class="op">></span> <span class="kw">ANY</span> (
+    <span class="kw">SELECT</span> <span class="col">Salary</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="kw">WHERE</span> <span class="col">Dept</span> <span class="op">=</span> <span class="str">'HR'</span>
+);
+<span class="cmt">-- HR salaries: 55000, 62000
+-- ANY: salary > 55000 (the smallest)</span>
+
+<span class="cmt">-- ALL: salary greater than ALL HR salaries</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Salary</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">Salary</span> <span class="op">></span> <span class="kw">ALL</span> (
+    <span class="kw">SELECT</span> <span class="col">Salary</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="kw">WHERE</span> <span class="col">Dept</span> <span class="op">=</span> <span class="str">'HR'</span>
+);
+<span class="cmt">-- ALL: salary > 62000 (the largest)</span></code></pre>
+      </div>
+
+      <div class="result-label">Result: Salary > ALL HR Salaries (salary > 62000)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Salary</th></tr></thead>
+          <tbody>
+            <tr><td>Alice</td><td>85000</td></tr>
+            <tr><td>Carol</td><td>92000</td></tr>
+            <tr><td>David</td><td>78000</td></tr>
+            <tr><td>Frank</td><td>95000</td></tr>
+            <tr><td>Grace</td><td>70000</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <table class="compare-table">
+        <thead><tr><th>Operator</th><th>Condition</th><th>Equivalent to</th></tr></thead>
+        <tbody>
+          <tr><td><code>IN (subquery)</code></td><td>Value equals any result</td><td><code>= ANY (subquery)</code></td></tr>
+          <tr><td><code>> ANY (subquery)</code></td><td>Greater than the minimum result</td><td><code>> MIN(subquery)</code></td></tr>
+          <tr><td><code>> ALL (subquery)</code></td><td>Greater than the maximum result</td><td><code>> MAX(subquery)</code></td></tr>
+          <tr><td><code>NOT IN (subquery)</code></td><td>Not equal to any result</td><td><code>!= ALL (subquery)</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CORRELATED SUBQUERY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="correlated"></span>
+      <div class="section-header">
+        <div class="section-num">8.3</div>
+        <h2>Correlated Subquery</h2>
+      </div>
+      <p>A <strong>correlated subquery</strong> references a column from the <em>outer query</em>. It executes <strong>once for every row</strong> in the outer query (row-by-row execution).</p>
+      <p>An <strong>uncorrelated (non-correlated) subquery</strong> is completely independent — it runs once and its result is reused.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Correlated Subquery</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Find employees earning MORE than the average of THEIR OWN department</span>
+<span class="kw">SELECT</span>
+    <span class="tbl">e1</span>.<span class="col">EmpName</span>,
+    <span class="tbl">e1</span>.<span class="col">Dept</span>,
+    <span class="tbl">e1</span>.<span class="col">Salary</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span> <span class="tbl">e1</span>
+<span class="kw">WHERE</span>  <span class="tbl">e1</span>.<span class="col">Salary</span> <span class="op">></span> (
+    <span class="kw">SELECT</span> <span class="fn">AVG</span>(<span class="tbl">e2</span>.<span class="col">Salary</span>)
+    <span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span> <span class="tbl">e2</span>
+    <span class="kw">WHERE</span>  <span class="tbl">e2</span>.<span class="col">Dept</span> <span class="op">=</span> <span class="tbl">e1</span>.<span class="col">Dept</span>  <span class="cmt">-- ← references outer query's Dept!</span>
+);
+
+<span class="cmt">-- For each outer row (e1), the inner query filters by e1.Dept:
+-- IT rows: inner query calculates IT avg = (85000+92000+70000)/3 = 82333
+-- HR rows: inner query calculates HR avg = (55000+62000)/2 = 58500
+-- Finance: inner query calculates Finance avg = (78000+95000)/2 = 86500</span></code></pre>
+      </div>
+
+      <div class="result-label">Result: Employees earning above their dept's average</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Dept</th><th>Salary</th><th>Dept Avg</th></tr></thead>
+          <tbody>
+            <tr><td>Carol</td><td>IT</td><td>92000</td><td class="highlight-val">82333 (IT Avg)</td></tr>
+            <tr><td>Eva</td><td>HR</td><td>62000</td><td class="highlight-val">58500 (HR Avg)</td></tr>
+            <tr><td>Frank</td><td>Finance</td><td>95000</td><td class="highlight-val">86500 (Finance Avg)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Correlated vs Uncorrelated</div>
+        <ul>
+          <li><strong>Uncorrelated:</strong> Inner query is independent. Runs ONCE. Faster.</li>
+          <li><strong>Correlated:</strong> Inner query references outer query column. Runs for EVERY outer row. Slower but more powerful.</li>
+          <li>You can often rewrite a correlated subquery as a JOIN for better performance.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- EXISTS -->
+    <div class="topic-section">
+      <span class="section-anchor" id="exists"></span>
+      <div class="section-header">
+        <div class="section-num">8.4</div>
+        <h2>EXISTS and NOT EXISTS</h2>
+      </div>
+      <p><strong>When to use:</strong> To check whether a subquery returns <em>any rows at all</em>. More efficient than <code>IN</code> for large datasets because it stops as soon as one match is found.</p>
+      <p><code>EXISTS</code> returns TRUE if the subquery returns at least one row. It ignores the actual data — only tests for existence.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — EXISTS</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Find employees who HAVE appeared as a ManagerID (i.e., they manage someone)</span>
+<span class="kw">SELECT</span> <span class="col">EmpID</span>, <span class="col">EmpName</span>, <span class="col">Dept</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span> <span class="tbl">e1</span>
+<span class="kw">WHERE</span>  <span class="kw">EXISTS</span> (
+    <span class="kw">SELECT</span> <span class="num">1</span>   <span class="cmt">-- SELECT 1 is a convention (doesn't matter what you select)</span>
+    <span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span> <span class="tbl">e2</span>
+    <span class="kw">WHERE</span>  <span class="tbl">e2</span>.<span class="col">ManagerID</span> <span class="op">=</span> <span class="tbl">e1</span>.<span class="col">EmpID</span>
+);
+
+<span class="cmt">-- NOT EXISTS: employees who manage NO ONE</span>
+<span class="kw">SELECT</span> <span class="col">EmpID</span>, <span class="col">EmpName</span>, <span class="col">Dept</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span> <span class="tbl">e1</span>
+<span class="kw">WHERE</span>  <span class="kw">NOT EXISTS</span> (
+    <span class="kw">SELECT</span> <span class="num">1</span>
+    <span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span> <span class="tbl">e2</span>
+    <span class="kw">WHERE</span>  <span class="tbl">e2</span>.<span class="col">ManagerID</span> <span class="op">=</span> <span class="tbl">e1</span>.<span class="col">EmpID</span>
+);</code></pre>
+      </div>
+
+      <div class="result-label">EXISTS Result: Employees who are managers</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th><th>Dept</th></tr></thead>
+          <tbody>
+            <tr><td>E03</td><td>Carol</td><td>IT</td></tr>
+            <tr><td>E05</td><td>Eva</td><td>HR</td></tr>
+            <tr><td>E06</td><td>Frank</td><td>Finance</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="result-label">NOT EXISTS Result: Employees who manage no one</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpID</th><th>EmpName</th><th>Dept</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>Alice</td><td>IT</td></tr>
+            <tr><td>E02</td><td>Bob</td><td>HR</td></tr>
+            <tr><td>E04</td><td>David</td><td>Finance</td></tr>
+            <tr><td>E07</td><td>Grace</td><td>IT</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <table class="compare-table">
+        <thead><tr><th>Feature</th><th>IN</th><th>EXISTS</th></tr></thead>
+        <tbody>
+          <tr><td>Tests for</td><td>Value equality</td><td>Row existence</td></tr>
+          <tr><td>Performance on large sets</td><td>Slower (evaluates all values)</td><td>Faster (stops at first match)</td></tr>
+          <tr><td>NULL handling</td><td><code>NOT IN (NULL,...)</code> returns no rows!</td><td>EXISTS handles NULL correctly</td></tr>
+          <tr><td>Use when</td><td>Comparing against a small list</td><td>Checking for related row existence</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SUBQUERY IN FROM -->
+    <div class="topic-section">
+      <span class="section-anchor" id="inline-view"></span>
+      <div class="section-header">
+        <div class="section-num">8.5</div>
+        <h2>Subquery in FROM Clause (Inline View / Derived Table)</h2>
+      </div>
+      <p>A subquery in the <code>FROM</code> clause creates a temporary table that the outer query can use. You must give it an alias.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Subquery in FROM</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- First compute dept averages, then filter depts with avg > 70000</span>
+<span class="kw">SELECT</span>
+    <span class="tbl">dept_summary</span>.<span class="col">Dept</span>,
+    <span class="tbl">dept_summary</span>.<span class="col">AvgSalary</span>
+<span class="kw">FROM</span> (
+    <span class="cmt">-- Inner query: compute averages per department</span>
+    <span class="kw">SELECT</span>
+        <span class="col">Dept</span>,
+        <span class="fn">ROUND</span>(<span class="fn">AVG</span>(<span class="col">Salary</span>), <span class="num">2</span>) <span class="kw">AS</span> AvgSalary,
+        <span class="fn">COUNT</span>(<span class="op">*</span>)                <span class="kw">AS</span> EmpCount
+    <span class="kw">FROM</span>     <span class="tbl">EMPLOYEES</span>
+    <span class="kw">GROUP BY</span> <span class="col">Dept</span>
+) <span class="tbl">dept_summary</span>   <span class="cmt">-- Alias is mandatory</span>
+<span class="kw">WHERE</span> <span class="tbl">dept_summary</span>.<span class="col">AvgSalary</span> <span class="op">></span> <span class="num">70000</span>
+<span class="kw">ORDER BY</span> <span class="tbl">dept_summary</span>.<span class="col">AvgSalary</span> <span class="kw">DESC</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Inner derived table (dept_summary)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>Dept</th><th>AvgSalary</th><th>EmpCount</th></tr></thead>
+          <tbody>
+            <tr><td>Finance</td><td>86500.00</td><td>2</td></tr>
+            <tr><td>IT</td><td>82333.33</td><td>3</td></tr>
+            <tr><td>HR</td><td>58500.00</td><td>2</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="result-label">Final Result: WHERE AvgSalary > 70000</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>Dept</th><th>AvgSalary</th></tr></thead>
+          <tbody>
+            <tr><td>Finance</td><td class="highlight-val">86500.00</td></tr>
+            <tr><td>IT</td><td class="highlight-val">82333.33</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NESTED SUBQUERY -->
+    <div class="topic-section">
+      <span class="section-anchor" id="nested"></span>
+      <div class="section-header">
+        <div class="section-num">8.6</div>
+        <h2>Nested Subqueries</h2>
+      </div>
+      <p>Subqueries can be nested inside other subqueries. This allows very complex conditions to be expressed cleanly.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Nested (Multi-level) Subquery</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Find employees in the department with the HIGHEST total salary bill</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">Dept</span>, <span class="col">Salary</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">Dept</span> <span class="op">=</span> (
+    <span class="cmt">-- Level 2: find which dept has the max total salary</span>
+    <span class="kw">SELECT</span> <span class="col">Dept</span>
+    <span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+    <span class="kw">GROUP BY</span> <span class="col">Dept</span>
+    <span class="kw">HAVING</span> <span class="fn">SUM</span>(<span class="col">Salary</span>) <span class="op">=</span> (
+        <span class="cmt">-- Level 3: what is the maximum total salary across all depts?</span>
+        <span class="kw">SELECT</span> <span class="fn">MAX</span>(<span class="col">DeptTotal</span>)
+        <span class="kw">FROM</span> (
+            <span class="kw">SELECT</span> <span class="fn">SUM</span>(<span class="col">Salary</span>) <span class="kw">AS</span> DeptTotal
+            <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>
+            <span class="kw">GROUP BY</span> <span class="col">Dept</span>
+        ) <span class="tbl">totals</span>
+    )
+);</code></pre>
+      </div>
+
+      <div class="result-label">Result: Employees in IT (highest total salary dept = 247000)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Dept</th><th>Salary</th></tr></thead>
+          <tbody>
+            <tr><td>Alice</td><td>IT</td><td>85000</td></tr>
+            <tr><td>Carol</td><td>IT</td><td>92000</td></tr>
+            <tr><td>Grace</td><td>IT</td><td>70000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SUBQUERY IN HAVING -->
+    <div class="topic-section">
+      <span class="section-anchor" id="subquery-having"></span>
+      <div class="section-header">
+        <div class="section-num">8.7</div>
+        <h2>Subquery in HAVING</h2>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Subquery in HAVING</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Find departments whose avg salary > overall avg salary</span>
+<span class="kw">SELECT</span>
+    <span class="col">Dept</span>,
+    <span class="fn">ROUND</span>(<span class="fn">AVG</span>(<span class="col">Salary</span>), <span class="num">2</span>) <span class="kw">AS</span> DeptAvg
+<span class="kw">FROM</span>     <span class="tbl">EMPLOYEES</span>
+<span class="kw">GROUP BY</span> <span class="col">Dept</span>
+<span class="kw">HAVING</span>   <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="op">></span> (
+    <span class="kw">SELECT</span> <span class="fn">AVG</span>(<span class="col">Salary</span>) <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>
+);</code></pre>
+      </div>
+
+      <div class="result-label">Result: Depts with avg salary above overall avg (76714)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>Dept</th><th>DeptAvg</th></tr></thead>
+          <tbody>
+            <tr><td>Finance</td><td>86500.00</td></tr>
+            <tr><td>IT</td><td>82333.33</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title">🔑 Subquery Summary</div>
+        <ul>
+          <li><strong>Scalar:</strong> Returns one value. Use with <code>=, &gt;, &lt;</code>.</li>
+          <li><strong>Multi-row:</strong> Returns many values. Use with <code>IN, ANY, ALL</code>.</li>
+          <li><strong>Correlated:</strong> References outer query. Runs per outer row.</li>
+          <li><strong>Uncorrelated:</strong> Independent. Runs once.</li>
+          <li><strong>EXISTS:</strong> Tests if any row exists. Fast; handles NULL correctly.</li>
+          <li><strong>Inline View:</strong> Subquery in FROM. Must have alias.</li>
+          <li><strong>In HAVING:</strong> Filter groups using aggregate results from another query.</li>
+        </ul>
+      </div>
+
+      <div class="info-box mistakes">
+        <div class="info-title">⚠️ Mistakes to Avoid</div>
+        <ul>
+          <li>Using <code>=</code> with a multi-row subquery — this throws an error. Use <code>IN</code> instead.</li>
+          <li>Using <code>NOT IN</code> when the subquery might return NULLs — <code>NOT IN (1, 2, NULL)</code> always returns no rows! Use <code>NOT EXISTS</code> instead.</li>
+          <li>Forgetting to alias subqueries in the FROM clause.</li>
+          <li>Deeply nested subqueries are hard to read — consider rewriting as JOINs or Common Table Expressions (CTEs) for clarity.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- FINAL REVIEW -->
+    <div class="topic-section">
+      <span class="section-anchor" id="final-review"></span>
+      <div class="section-header">
+        <div class="section-num">✓</div>
+        <h2>Handbook Complete — What You've Learned</h2>
+      </div>
+
+      <div class="concept-grid">
+        <div class="concept-card">
+          <div class="card-icon">📐</div>
+          <div class="card-title">Normalization</div>
+          <div class="card-desc">1NF, 2NF, 3NF — eliminating redundancy and anomalies through structured design.</div>
+        </div>
+        <div class="concept-card">
+          <div class="card-icon">🔑</div>
+          <div class="card-title">Keys & Constraints</div>
+          <div class="card-desc">Primary, Foreign, Composite, Alternate keys. NOT NULL, UNIQUE, CHECK, DEFAULT.</div>
+        </div>
+        <div class="concept-card">
+          <div class="card-icon">🛠️</div>
+          <div class="card-title">DDL · DML · TCL</div>
+          <div class="card-desc">Creating tables, inserting data, transactions with COMMIT and ROLLBACK.</div>
+        </div>
+        <div class="concept-card">
+          <div class="card-icon">🔍</div>
+          <div class="card-title">SELECT & WHERE</div>
+          <div class="card-desc">Filtering, sorting, LIKE patterns, BETWEEN, IN, IS NULL, ORDER BY.</div>
+        </div>
+        <div class="concept-card">
+          <div class="card-icon">⚙️</div>
+          <div class="card-title">Functions</div>
+          <div class="card-desc">NVL, COALESCE, CAST, string, date, and math functions.</div>
+        </div>
+        <div class="concept-card">
+          <div class="card-icon">📊</div>
+          <div class="card-title">Aggregation</div>
+          <div class="card-desc">COUNT, SUM, AVG, MIN, MAX, GROUP BY, HAVING, WHERE vs HAVING.</div>
+        </div>
+        <div class="concept-card">
+          <div class="card-icon">🔗</div>
+          <div class="card-title">Joins</div>
+          <div class="card-desc">INNER, LEFT, RIGHT, FULL OUTER, CROSS, SELF joins. Multi-table queries.</div>
+        </div>
+        <div class="concept-card">
+          <div class="card-icon">🧩</div>
+          <div class="card-title">Subqueries</div>
+          <div class="card-desc">Scalar, multi-row, correlated, inline views, EXISTS, IN, ANY, ALL.</div>
+        </div>
+      </div>
+
+      <div class="info-box tip">
+        <div class="info-title">💡 Next Steps</div>
+        <ul>
+          <li>Practice every concept by running the examples in your HSQLDB environment.</li>
+          <li>Try modifying the queries to ask different questions of the same data.</li>
+          <li>Build your own database schema from scratch — apply normalization before writing any SQL.</li>
+          <li>Explore advanced topics: Window Functions, Common Table Expressions (CTEs), Indexes, Stored Procedures.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+
+  <div class="page-nav-footer">
+    <a href="part7-joins.html" class="nav-link-card">
+      <div class="nlc-arrow">←</div>
+      <div>
+        <div class="nlc-label">Chapter 7</div>
+        <div class="nlc-title">Joins & Multi-Table</div>
+      </div>
+    </a>
+    <a href="index.html" class="nav-link-card next">
+      <div class="nlc-arrow">🏠</div>
+      <div>
+        <div class="nlc-label">Finished!</div>
+        <div class="nlc-title">Back to Table of Contents</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<button class="back-to-top" id="backToTop">↑</button>
+<script src="nav.js"></script>
+<script>buildSidebar('part8-subqueries-sets.html');</script>
+</body>
+</html>
