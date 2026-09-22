@@ -28,7 +28,7 @@
   <div class="content-area">
 
     <div class="page-header">
-      <div class="part-badge">🔗 Part 4 · Chapter 7</div>
+      <div class="part-badge"><i data-lucide="link" class="icon"></i> Part 4 · Chapter 7</div>
       <h1 class="page-title">Joins & Multi-Table Queries</h1>
       <p class="page-subtitle">
         Joins are the superpower of relational databases — combining data from multiple tables into one result. 
@@ -318,7 +318,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Self Join Key Points</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Self Join Key Points</div>
         <ul>
           <li>Always use <strong>table aliases</strong> to distinguish the two copies of the same table.</li>
           <li>Use LEFT JOIN if some rows might not have a matching self-reference (e.g., top-level managers).</li>
@@ -486,7 +486,7 @@
       </table>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Join Summary</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Join Summary</div>
         <ul>
           <li><strong>INNER JOIN:</strong> Only matching rows from both sides.</li>
           <li><strong>LEFT JOIN:</strong> All left rows + matching right rows (NULLs for non-matches).</li>
@@ -521,5 +521,7 @@
 <button class="back-to-top" id="backToTop">↑</button>
 <script src="nav.js"></script>
 <script>buildSidebar('part7-joins.html');</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

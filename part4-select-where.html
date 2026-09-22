@@ -28,7 +28,7 @@
   <div class="content-area">
 
     <div class="page-header">
-      <div class="part-badge">🔍 Part 2 · Chapter 4</div>
+      <div class="part-badge"><i data-lucide="search" class="icon"></i> Part 2 · Chapter 4</div>
       <h1 class="page-title">SELECT · WHERE · ORDER BY</h1>
       <p class="page-subtitle">
         The art of retrieving exactly the data you need. From basic column selection to complex multi-condition filtering, 
@@ -252,7 +252,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Golden Rule</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Golden Rule</div>
         <p style="font-size:14px; color:var(--text-secondary); margin:0;">When mixing AND and OR — <strong>always use brackets</strong> to be explicit. Even if technically not needed, brackets make your intent clear and prevent bugs.</p>
       </div>
     </div>
@@ -487,7 +487,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 ORDER BY Key Points</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> ORDER BY Key Points</div>
         <ul>
           <li>Multiple columns: separated by comma. Left-to-right priority.</li>
           <li>Default is <code>ASC</code> — you can omit it.</li>
@@ -520,5 +520,7 @@
 <button class="back-to-top" id="backToTop">↑</button>
 <script src="nav.js"></script>
 <script>buildSidebar('part4-select-where.html');</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

@@ -1326,3 +1326,16 @@ ol.styled-list li::marker { color: var(--accent-gold); font-weight: 700; }
 .index-topic-list li a:hover {
   color: var(--accent-teal);
 }
+
+/* ============ LUCIDE ICONS ============ */
+.icon {
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: text-bottom;
+  stroke-width: 2.2;
+}
+
+.nav-icon .icon {
+  width: 1.2em;
+  height: 1.2em;
+}

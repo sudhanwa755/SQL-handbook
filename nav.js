@@ -3,35 +3,35 @@ const NAV_PAGES = [
   {
     label: "Overview",
     items: [
-      { href: "index.html", icon: "🏠", text: "Home & Table of Contents", badge: "" }
+      { href: "index.html", icon: '<i data-lucide="home" class="icon"></i>', text: "Home & Table of Contents", badge: "" }
     ]
   },
   {
     label: "Part 1 — Theory",
     items: [
-      { href: "part1-normalization.html", icon: "📐", text: "1. Normalization (1NF–3NF)", badge: "3NF" },
-      { href: "part2-keys-constraints.html", icon: "🔑", text: "2. Keys & Constraints", badge: "" },
-      { href: "part3-ddl-dml-tcl.html", icon: "🛠️", text: "3. DDL · DML · TCL", badge: "" },
+      { href: "part1-normalization.html", icon: '<i data-lucide="ruler" class="icon"></i>', text: "1. Normalization (1NF–3NF)", badge: "3NF" },
+      { href: "part2-keys-constraints.html", icon: '<i data-lucide="key" class="icon"></i>', text: "2. Keys & Constraints", badge: "" },
+      { href: "part3-ddl-dml-tcl.html", icon: '<i data-lucide="wrench" class="icon"></i>', text: "3. DDL · DML · TCL", badge: "" },
     ]
   },
   {
     label: "Part 2 — Querying",
     items: [
-      { href: "part4-select-where.html", icon: "🔍", text: "4. SELECT · WHERE · ORDER BY", badge: "" },
-      { href: "part5-functions.html", icon: "⚙️", text: "5. NULL · Functions · CAST", badge: "" },
+      { href: "part4-select-where.html", icon: '<i data-lucide="search" class="icon"></i>', text: "4. SELECT · WHERE · ORDER BY", badge: "" },
+      { href: "part5-functions.html", icon: '<i data-lucide="settings" class="icon"></i>', text: "5. NULL · Functions · CAST", badge: "" },
     ]
   },
   {
     label: "Part 3 — Aggregation",
     items: [
-      { href: "part6-groupby-having.html", icon: "📊", text: "6. GROUP BY · HAVING", badge: "" },
+      { href: "part6-groupby-having.html", icon: '<i data-lucide="bar-chart-2" class="icon"></i>', text: "6. GROUP BY · HAVING", badge: "" },
     ]
   },
   {
     label: "Part 4 — Multi-Table",
     items: [
-      { href: "part7-joins.html", icon: "🔗", text: "7. All Joins · Self Join", badge: "" },
-      { href: "part8-subqueries-sets.html", icon: "🧩", text: "8. Subqueries · Set Ops", badge: "ADV" },
+      { href: "part7-joins.html", icon: '<i data-lucide="link" class="icon"></i>', text: "7. All Joins · Self Join", badge: "" },
+      { href: "part8-subqueries-sets.html", icon: '<i data-lucide="puzzle" class="icon"></i>', text: "8. Subqueries · Set Ops", badge: "ADV" },
     ]
   }
 ];
@@ -253,10 +253,12 @@ function setupScrollSpy() {
   let html = '';
   sections.forEach((sec) => {
     const h2 = sec.querySelector('h2');
+    const num = sec.querySelector('.section-num');
     const anchor = sec.querySelector('.section-anchor');
     if (!h2 || !anchor) return;
     const id = anchor.id;
-    const text = h2.innerText;
+    const numText = num && num.innerText.trim() !== '' ? num.innerText + ' ' : '';
+    const text = numText + h2.innerText;
     html += `<a href="#${id}" class="nav-sub-item scrollspy-link" data-target="${id}">${text}</a>`;
   });
 

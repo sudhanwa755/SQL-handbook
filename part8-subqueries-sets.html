@@ -28,7 +28,7 @@
   <div class="content-area">
 
     <div class="page-header">
-      <div class="part-badge">🧩 Part 4 · Chapter 8</div>
+      <div class="part-badge"><i data-lucide="puzzle" class="icon"></i> Part 4 · Chapter 8</div>
       <h1 class="page-title">Subqueries & Advanced</h1>
       <p class="page-subtitle">
         A subquery is a query nested inside another query. It lets you use the results of one query as a condition or value in another. 
@@ -309,7 +309,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Correlated vs Uncorrelated</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Correlated vs Uncorrelated</div>
         <ul>
           <li><strong>Uncorrelated:</strong> Inner query is independent. Runs ONCE. Faster.</li>
           <li><strong>Correlated:</strong> Inner query references outer query column. Runs for EVERY outer row. Slower but more powerful.</li>
@@ -514,7 +514,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Subquery Summary</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Subquery Summary</div>
         <ul>
           <li><strong>Scalar:</strong> Returns one value. Use with <code>=, &gt;, &lt;</code>.</li>
           <li><strong>Multi-row:</strong> Returns many values. Use with <code>IN, ANY, ALL</code>.</li>
@@ -547,42 +547,42 @@
 
       <div class="concept-grid">
         <div class="concept-card">
-          <div class="card-icon">📐</div>
+          <div class="card-icon"><i data-lucide="ruler" class="icon"></i></div>
           <div class="card-title">Normalization</div>
           <div class="card-desc">1NF, 2NF, 3NF — eliminating redundancy and anomalies through structured design.</div>
         </div>
         <div class="concept-card">
-          <div class="card-icon">🔑</div>
+          <div class="card-icon"><i data-lucide="key" class="icon"></i></div>
           <div class="card-title">Keys & Constraints</div>
           <div class="card-desc">Primary, Foreign, Composite, Alternate keys. NOT NULL, UNIQUE, CHECK, DEFAULT.</div>
         </div>
         <div class="concept-card">
-          <div class="card-icon">🛠️</div>
+          <div class="card-icon"><i data-lucide="wrench" class="icon"></i></div>
           <div class="card-title">DDL · DML · TCL</div>
           <div class="card-desc">Creating tables, inserting data, transactions with COMMIT and ROLLBACK.</div>
         </div>
         <div class="concept-card">
-          <div class="card-icon">🔍</div>
+          <div class="card-icon"><i data-lucide="search" class="icon"></i></div>
           <div class="card-title">SELECT & WHERE</div>
           <div class="card-desc">Filtering, sorting, LIKE patterns, BETWEEN, IN, IS NULL, ORDER BY.</div>
         </div>
         <div class="concept-card">
-          <div class="card-icon">⚙️</div>
+          <div class="card-icon"><i data-lucide="settings" class="icon"></i></div>
           <div class="card-title">Functions</div>
           <div class="card-desc">NVL, COALESCE, CAST, string, date, and math functions.</div>
         </div>
         <div class="concept-card">
-          <div class="card-icon">📊</div>
+          <div class="card-icon"><i data-lucide="bar-chart-2" class="icon"></i></div>
           <div class="card-title">Aggregation</div>
           <div class="card-desc">COUNT, SUM, AVG, MIN, MAX, GROUP BY, HAVING, WHERE vs HAVING.</div>
         </div>
         <div class="concept-card">
-          <div class="card-icon">🔗</div>
+          <div class="card-icon"><i data-lucide="link" class="icon"></i></div>
           <div class="card-title">Joins</div>
           <div class="card-desc">INNER, LEFT, RIGHT, FULL OUTER, CROSS, SELF joins. Multi-table queries.</div>
         </div>
         <div class="concept-card">
-          <div class="card-icon">🧩</div>
+          <div class="card-icon"><i data-lucide="puzzle" class="icon"></i></div>
           <div class="card-title">Subqueries</div>
           <div class="card-desc">Scalar, multi-row, correlated, inline views, EXISTS, IN, ANY, ALL.</div>
         </div>
@@ -610,7 +610,7 @@
       </div>
     </a>
     <a href="index.html" class="nav-link-card next">
-      <div class="nlc-arrow">🏠</div>
+      <div class="nlc-arrow"><i data-lucide="home" class="icon"></i></div>
       <div>
         <div class="nlc-label">Finished!</div>
         <div class="nlc-title">Back to Table of Contents</div>
@@ -622,5 +622,7 @@
 <button class="back-to-top" id="backToTop">↑</button>
 <script src="nav.js"></script>
 <script>buildSidebar('part8-subqueries-sets.html');</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

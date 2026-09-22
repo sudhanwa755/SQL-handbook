@@ -29,7 +29,7 @@
 
     <!-- PAGE HEADER -->
     <div class="page-header">
-      <div class="part-badge">📐 Part 1 · Chapter 1</div>
+      <div class="part-badge"><i data-lucide="ruler" class="icon"></i> Part 1 · Chapter 1</div>
       <h1 class="page-title">Database Normalization</h1>
       <p class="page-subtitle">
         Normalization is the process of organizing a database to eliminate <strong>redundancy</strong> and 
@@ -72,7 +72,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Key Rule</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Key Rule</div>
         <p style="font-size:14px; color:var(--text-secondary); margin:0;">
           Each Normal Form (NF) builds on top of the previous one. A table in <strong>3NF is also in 2NF and 1NF</strong>. 
           You cannot skip a form.
@@ -98,13 +98,13 @@
         <li>The order of rows does <strong>not matter</strong>.</li>
       </ul>
 
-      <h3>❌ Table That Violates 1NF</h3>
+      <h3><i data-lucide="x-circle" class="icon"></i> Table That Violates 1NF</h3>
       <p>Here is a <code>STUDENT_COURSES</code> table. The <code>Courses</code> column stores multiple values — this breaks 1NF.</p>
 
       <div class="result-label">Table: STUDENT_COURSES (BAD — Violates 1NF)</div>
       <div class="result-table-wrap">
         <table class="result-table">
-          <thead><tr><th>StudentID</th><th>StudentName</th><th>Courses ❌</th></tr></thead>
+          <thead><tr><th>StudentID</th><th>StudentName</th><th>Courses <i data-lucide="x-circle" class="icon"></i></th></tr></thead>
           <tbody>
             <tr><td>101</td><td>Alice</td><td class="highlight-val">Math, Science, English</td></tr>
             <tr><td>102</td><td>Bob</td><td class="highlight-val">Math, History</td></tr>
@@ -115,13 +115,13 @@
 
       <p>The <code>Courses</code> column has multiple values. This makes querying, filtering, and joining impossible cleanly.</p>
 
-      <h3>✅ Converting to 1NF</h3>
+      <h3><i data-lucide="check-circle-2" class="icon"></i> Converting to 1NF</h3>
       <p>Split the multi-valued column into separate rows, one course per row:</p>
 
       <div class="result-label">Table: STUDENT_COURSES (FIXED — In 1NF)</div>
       <div class="result-table-wrap">
         <table class="result-table">
-          <thead><tr><th>StudentID</th><th>StudentName</th><th>Course ✅</th></tr></thead>
+          <thead><tr><th>StudentID</th><th>StudentName</th><th>Course <i data-lucide="check-circle-2" class="icon"></i></th></tr></thead>
           <tbody>
             <tr><td>101</td><td>Alice</td><td>Math</td></tr>
             <tr><td>101</td><td>Alice</td><td>Science</td></tr>
@@ -134,7 +134,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Key Points — 1NF</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Key Points — 1NF</div>
         <ul>
           <li>No repeating groups or arrays in any column.</li>
           <li>Each cell must hold exactly ONE value.</li>
@@ -175,7 +175,7 @@
         </p>
       </div>
 
-      <h3>❌ Table That Violates 2NF</h3>
+      <h3><i data-lucide="x-circle" class="icon"></i> Table That Violates 2NF</h3>
       <p>
         The table below has a composite key: <code>(StudentID, CourseID)</code>.<br/>
         <code>StudentName</code> depends only on <code>StudentID</code> — not on <code>CourseID</code>. This is a <strong>partial dependency</strong> → violates 2NF.
@@ -184,7 +184,7 @@
       <div class="result-label">Table: ENROLLMENT (BAD — Violates 2NF)</div>
       <div class="result-table-wrap">
         <table class="result-table">
-          <thead><tr><th>StudentID 🔑</th><th>CourseID 🔑</th><th>StudentName ❌</th><th>CourseName ❌</th><th>Grade ✅</th></tr></thead>
+          <thead><tr><th>StudentID <i data-lucide="key" class="icon"></i></th><th>CourseID <i data-lucide="key" class="icon"></i></th><th>StudentName <i data-lucide="x-circle" class="icon"></i></th><th>CourseName <i data-lucide="x-circle" class="icon"></i></th><th>Grade <i data-lucide="check-circle-2" class="icon"></i></th></tr></thead>
           <tbody>
             <tr><td>101</td><td>C01</td><td class="highlight-val">Alice</td><td class="highlight-val">Math</td><td>A</td></tr>
             <tr><td>101</td><td>C02</td><td class="highlight-val">Alice</td><td class="highlight-val">Science</td><td>B</td></tr>
@@ -195,12 +195,12 @@
 
       <p>Notice <code>Alice</code> is repeated — that's the update anomaly. Changing Alice's name needs to update every row.</p>
 
-      <h3>✅ Converting to 2NF — Split into 3 tables</h3>
+      <h3><i data-lucide="check-circle-2" class="icon"></i> Converting to 2NF — Split into 3 tables</h3>
 
       <div class="result-label">Table: STUDENTS</div>
       <div class="result-table-wrap">
         <table class="result-table">
-          <thead><tr><th>StudentID 🔑</th><th>StudentName</th></tr></thead>
+          <thead><tr><th>StudentID <i data-lucide="key" class="icon"></i></th><th>StudentName</th></tr></thead>
           <tbody>
             <tr><td>101</td><td>Alice</td></tr>
             <tr><td>102</td><td>Bob</td></tr>
@@ -211,7 +211,7 @@
       <div class="result-label">Table: COURSES</div>
       <div class="result-table-wrap">
         <table class="result-table">
-          <thead><tr><th>CourseID 🔑</th><th>CourseName</th></tr></thead>
+          <thead><tr><th>CourseID <i data-lucide="key" class="icon"></i></th><th>CourseName</th></tr></thead>
           <tbody>
             <tr><td>C01</td><td>Math</td></tr>
             <tr><td>C02</td><td>Science</td></tr>
@@ -222,7 +222,7 @@
       <div class="result-label">Table: ENROLLMENT (Grade only — depends on both keys)</div>
       <div class="result-table-wrap">
         <table class="result-table">
-          <thead><tr><th>StudentID 🔑</th><th>CourseID 🔑</th><th>Grade ✅</th></tr></thead>
+          <thead><tr><th>StudentID <i data-lucide="key" class="icon"></i></th><th>CourseID <i data-lucide="key" class="icon"></i></th><th>Grade <i data-lucide="check-circle-2" class="icon"></i></th></tr></thead>
           <tbody>
             <tr><td>101</td><td>C01</td><td>A</td></tr>
             <tr><td>101</td><td>C02</td><td>B</td></tr>
@@ -232,7 +232,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Key Points — 2NF</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Key Points — 2NF</div>
         <ul>
           <li>Look for partial dependencies: can a non-key column be determined by just PART of the composite key?</li>
           <li>If yes — move that column to a new table where the partial key becomes the primary key.</li>
@@ -273,12 +273,12 @@
         </p>
       </div>
 
-      <h3>❌ Table That Violates 3NF</h3>
+      <h3><i data-lucide="x-circle" class="icon"></i> Table That Violates 3NF</h3>
 
       <div class="result-label">Table: EMPLOYEES (BAD — Violates 3NF)</div>
       <div class="result-table-wrap">
         <table class="result-table">
-          <thead><tr><th>EmpID 🔑</th><th>EmpName</th><th>DeptID</th><th>DeptName ❌</th><th>DeptCity ❌</th></tr></thead>
+          <thead><tr><th>EmpID <i data-lucide="key" class="icon"></i></th><th>EmpName</th><th>DeptID</th><th>DeptName <i data-lucide="x-circle" class="icon"></i></th><th>DeptCity <i data-lucide="x-circle" class="icon"></i></th></tr></thead>
           <tbody>
             <tr><td>E01</td><td>Alice</td><td>D10</td><td class="highlight-val">Engineering</td><td class="highlight-val">Mumbai</td></tr>
             <tr><td>E02</td><td>Bob</td><td>D10</td><td class="highlight-val">Engineering</td><td class="highlight-val">Mumbai</td></tr>
@@ -292,12 +292,12 @@
         So <code>EmpID → DeptName</code> is <strong>transitive</strong>. <code>DeptName</code> and <code>DeptCity</code> do not directly depend on <code>EmpID</code>.
       </p>
 
-      <h3>✅ Converting to 3NF — Split into 2 tables</h3>
+      <h3><i data-lucide="check-circle-2" class="icon"></i> Converting to 3NF — Split into 2 tables</h3>
 
-      <div class="result-label">Table: EMPLOYEES (3NF ✅)</div>
+      <div class="result-label">Table: EMPLOYEES (3NF <i data-lucide="check-circle-2" class="icon"></i>)</div>
       <div class="result-table-wrap">
         <table class="result-table">
-          <thead><tr><th>EmpID 🔑</th><th>EmpName</th><th>DeptID</th></tr></thead>
+          <thead><tr><th>EmpID <i data-lucide="key" class="icon"></i></th><th>EmpName</th><th>DeptID</th></tr></thead>
           <tbody>
             <tr><td>E01</td><td>Alice</td><td>D10</td></tr>
             <tr><td>E02</td><td>Bob</td><td>D10</td></tr>
@@ -306,10 +306,10 @@
         </table>
       </div>
 
-      <div class="result-label">Table: DEPARTMENTS (3NF ✅)</div>
+      <div class="result-label">Table: DEPARTMENTS (3NF <i data-lucide="check-circle-2" class="icon"></i>)</div>
       <div class="result-table-wrap">
         <table class="result-table">
-          <thead><tr><th>DeptID 🔑</th><th>DeptName</th><th>DeptCity</th></tr></thead>
+          <thead><tr><th>DeptID <i data-lucide="key" class="icon"></i></th><th>DeptName</th><th>DeptCity</th></tr></thead>
           <tbody>
             <tr><td>D10</td><td>Engineering</td><td>Mumbai</td></tr>
             <tr><td>D20</td><td>Marketing</td><td>Delhi</td></tr>
@@ -318,7 +318,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Key Points — 3NF</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Key Points — 3NF</div>
         <ul>
           <li>Every non-key column must depend ONLY on the primary key — "the key, the whole key, and nothing but the key."</li>
           <li>If column C depends on column B, and B is not a key — move B and C to a new table.</li>
@@ -362,7 +362,7 @@
         </div>
         <div class="step-item">
           <div class="step-num">4</div>
-          <div class="step-content">If all checks pass → the table is in <strong>3NF ✅</strong>.</div>
+          <div class="step-content">If all checks pass → the table is in <strong>3NF <i data-lucide="check-circle-2" class="icon"></i></strong>.</div>
         </div>
       </div>
 
@@ -416,5 +416,7 @@
 
 <script src="nav.js"></script>
 <script>buildSidebar('part1-normalization.html');</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

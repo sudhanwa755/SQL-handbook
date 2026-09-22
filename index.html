@@ -18,16 +18,16 @@
   <!-- TOP BAR -->
   <header class="topbar">
     <div class="topbar-breadcrumb">
-      <span class="crumb-current">🏠 Home</span>
+      <span class="crumb-current"><i data-lucide="home" class="icon"></i> Home</span>
     </div>
     <div class="topbar-actions">
-      <a href="part1-normalization.html" class="btn btn-primary">▶ Start Learning</a>
+      <a href="part1-normalization.html" class="btn btn-primary"><i data-lucide="play" class="icon"></i> Start Learning</a>
     </div>
   </header>
 
   <!-- HERO -->
   <section class="hero-section animate-in">
-    <div class="hero-label">✦ Complete Reference Guide</div>
+    <div class="hero-label"><i data-lucide="sparkles" class="icon"></i> Complete Reference Guide</div>
     <h1 class="hero-title">The HSQLDB<br /><span class="accent">Handbook</span></h1>
     <p class="hero-desc">
       A comprehensive, teacher-crafted SQL textbook covering everything from database theory to advanced subqueries. 
@@ -57,7 +57,7 @@
   <section class="content-area" style="max-width:1100px;">
 
     <div style="margin-bottom:32px;">
-      <h2 style="font-family:'Fraunces',serif; font-size:28px; color:var(--text-heading); margin-bottom:8px;">📖 Table of Contents</h2>
+      <h2 style="font-family:'Fraunces',serif; font-size:28px; color:var(--text-heading); margin-bottom:8px;"><i data-lucide="book-open" class="icon"></i> Table of Contents</h2>
       <p style="color:var(--text-muted); font-size:14px;">Click any chapter to jump directly to it. Topics are ordered from beginner to advanced.</p>
     </div>
 
@@ -184,7 +184,7 @@
     <div class="divider"></div>
 
     <!-- Quick Reference -->
-    <h3 style="font-family:'Fraunces',serif; font-size:24px; color:var(--text-heading); margin-bottom:20px;">⚡ Quick Reference — SQL Command Categories</h3>
+    <h3 style="font-family:'Fraunces',serif; font-size:24px; color:var(--text-heading); margin-bottom:20px;"><i data-lucide="zap" class="icon"></i> Quick Reference — SQL Command Categories</h3>
 
     <table class="compare-table">
       <thead>
@@ -251,5 +251,7 @@
 <script>
   buildSidebar('index.html');
 </script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

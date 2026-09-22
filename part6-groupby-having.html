@@ -28,7 +28,7 @@
   <div class="content-area">
 
     <div class="page-header">
-      <div class="part-badge">📊 Part 3 · Chapter 6</div>
+      <div class="part-badge"><i data-lucide="bar-chart-2" class="icon"></i> Part 3 · Chapter 6</div>
       <h1 class="page-title">GROUP BY & HAVING</h1>
       <p class="page-subtitle">
         Aggregation transforms raw rows into meaningful summaries. <code>GROUP BY</code> organizes rows into groups, 
@@ -298,14 +298,14 @@
         <table class="result-table">
           <thead><tr><th>Dept</th><th>EmpCount</th><th>AvgSalary</th><th>TotalSalary</th></tr></thead>
           <tbody>
-            <tr><td>Finance</td><td>2</td><td class="highlight-val">86500.0 ✅</td><td>173000</td></tr>
-            <tr><td>IT</td><td>3</td><td class="highlight-val">82333.3 ✅</td><td>247000</td></tr>
+            <tr><td>Finance</td><td>2</td><td class="highlight-val">86500.0 <i data-lucide="check-circle-2" class="icon"></i></td><td>173000</td></tr>
+            <tr><td>IT</td><td>3</td><td class="highlight-val">82333.3 <i data-lucide="check-circle-2" class="icon"></i></td><td>247000</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Simple Memory Rule</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Simple Memory Rule</div>
         <ul>
           <li><strong>Use WHERE</strong> to filter on raw column values (before grouping).</li>
           <li><strong>Use HAVING</strong> to filter on aggregate results (after grouping).</li>
@@ -377,5 +377,7 @@
 <button class="back-to-top" id="backToTop">↑</button>
 <script src="nav.js"></script>
 <script>buildSidebar('part6-groupby-having.html');</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

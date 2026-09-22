@@ -28,7 +28,7 @@
   <div class="content-area">
 
     <div class="page-header">
-      <div class="part-badge">🔑 Part 1 · Chapter 2</div>
+      <div class="part-badge"><i data-lucide="key" class="icon"></i> Part 1 · Chapter 2</div>
       <h1 class="page-title">Keys & Constraints</h1>
       <p class="page-subtitle">
         Keys uniquely identify rows in a table. Constraints enforce data rules at the database level. 
@@ -101,7 +101,7 @@
       </ul>
       <p><code>{EmpID, EmpName}</code> is NOT a candidate key because removing <code>EmpName</code> still gives uniqueness.</p>
       <div class="info-box key-points">
-        <div class="info-title">🔑 Key Points</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Key Points</div>
         <ul>
           <li>Every table must have at least ONE candidate key.</li>
           <li>Candidate keys are the minimal super keys.</li>
@@ -135,7 +135,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Key Points</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Key Points</div>
         <ul>
           <li>A table can have only <strong>ONE</strong> primary key (but it can span multiple columns — composite).</li>
           <li>Primary key values should never change (avoid using names, phone numbers — use artificial IDs).</li>
@@ -176,7 +176,7 @@
       <div class="result-label">Table: ENROLLMENT — Composite Key Example</div>
       <div class="result-table-wrap">
         <table class="result-table">
-          <thead><tr><th>StudentID 🔑</th><th>CourseID 🔑</th><th>Grade</th></tr></thead>
+          <thead><tr><th>StudentID <i data-lucide="key" class="icon"></i></th><th>CourseID <i data-lucide="key" class="icon"></i></th><th>Grade</th></tr></thead>
           <tbody>
             <tr><td>101</td><td>C01</td><td>A</td></tr>
             <tr><td>101</td><td>C02</td><td>B</td></tr>
@@ -212,7 +212,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Key Points — Foreign Key</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Key Points — Foreign Key</div>
         <ul>
           <li>A foreign key value must exist in the referenced table's primary key column — or be NULL.</li>
           <li>The child table (EMPLOYEES) holds the foreign key; the parent table (DEPARTMENTS) holds the primary key.</li>
@@ -353,7 +353,7 @@
       </div>
 
       <div class="info-box key-points">
-        <div class="info-title">🔑 Constraints Summary</div>
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Constraints Summary</div>
         <ul>
           <li><code>NOT NULL</code> — Column must always have a value.</li>
           <li><code>UNIQUE</code> — All values in the column must be distinct.</li>
@@ -388,5 +388,7 @@
 <button class="back-to-top" id="backToTop">↑</button>
 <script src="nav.js"></script>
 <script>buildSidebar('part2-keys-constraints.html');</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
 </body>
 </html>
