@@ -641,8 +641,9 @@ code {
   border-collapse: collapse;
   margin: 20px 0;
   border-radius: var(--radius);
-  overflow: hidden;
   border: 1px solid var(--border-glow);
+  display: block;
+  overflow-x: auto;
 }
 
 .compare-table th {
@@ -873,17 +874,20 @@ code {
   .sidebar { transform: translateX(-100%); box-shadow: 2px 0 20px rgba(0,0,0,0.3); }
   .sidebar.open { transform: translateX(0); }
   .main-content { margin-left: 0; }
-  .topbar { padding: 14px 20px; }
-  .content-area { padding: 30px 20px; }
-  .hero-section { padding: 40px 20px 30px; }
-  .hero-title { font-size: 42px; }
-  .hero-desc { font-size: 16px; }
-  .page-nav-footer { padding: 20px; flex-direction: column; }
-  .nav-link-card { max-width: 100%; }
+  .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .topbar-breadcrumb { font-size: 11px; }
+  .topbar-actions .btn { padding: 5px 10px; font-size: 11px; }
+  .content-area { padding: 24px 16px; }
+  .hero-section { padding: 32px 16px 24px; }
+  .hero-title { font-size: 32px; }
+  .hero-desc { font-size: 15px; }
+  .page-nav-footer { padding: 20px; flex-direction: column; text-align: center; }
+  .nav-link-card { max-width: 100%; width: 100%; justify-content: center; }
   .toc-grid { grid-template-columns: 1fr; }
   .hamburger-btn { display: block; }
-  .page-title { font-size: 36px; }
-  h2 { font-size: 26px; }
+  .page-title { font-size: 28px; }
+  h2 { font-size: 22px; }
+  h3 { font-size: 18px; }
   .concept-grid { grid-template-columns: 1fr; }
 }
 
@@ -950,6 +954,7 @@ ol.styled-list li::marker { color: var(--accent-gold); font-weight: 700; }
   gap: 0;
   margin: 20px 0;
   font-family: 'JetBrains Mono', monospace;
+  overflow-x: auto;
 }
 
 .circle {
