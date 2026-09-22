@@ -13,9 +13,9 @@
   --accent-coral: #f07060;
   --accent-violet: #9b7fff;
   --accent-blue: #5ba3f5;
-  --text-primary: #e8eaf0;
-  --text-secondary: #8891aa;
-  --text-muted: #555e75;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
   --text-heading: #ffffff;
   --border-subtle: #1f2438;
   --border-glow: #2a3050;
@@ -41,10 +41,10 @@
   --accent-coral: #e11d48;
   --accent-violet: #6d28d9;
   --accent-blue: #2563eb;
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-  --text-heading: #0f172a;
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --text-muted: #555555;
+  --text-heading: #000000;
   --border-subtle: #e2e8f0;
   --border-glow: #cbd5e1;
   --shadow-card: 0 4px 24px rgba(0,0,0,0.06);
@@ -1248,3 +1248,81 @@ ol.styled-list li::marker { color: var(--accent-gold); font-weight: 700; }
 }
 
 .back-to-top:hover { transform: translateY(-3px); }
+
+/* ============ BOOK INDEX ============ */
+.book-index {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.index-chapter {
+  margin-bottom: 32px;
+}
+
+.index-chapter-title {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  color: var(--accent-gold);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.index-chapter-title .chapter-part {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  background: rgba(245,200,66,0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+.index-chapter-title a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s;
+}
+
+.index-chapter-title a:hover {
+  color: #fff;
+}
+
+.index-topic-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.index-topic-list li {
+  margin-bottom: 12px;
+  padding-left: 24px;
+  position: relative;
+}
+
+.index-topic-list li::before {
+  content: '•';
+  color: var(--accent-teal);
+  position: absolute;
+  left: 6px;
+  top: 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.index-topic-list li a {
+  text-decoration: none;
+  color: var(--text-heading);
+  font-size: 15px;
+  transition: color 0.2s;
+  line-height: 1.5;
+  display: inline-block;
+}
+
+.index-topic-list li a:hover {
+  color: var(--accent-teal);
+}
