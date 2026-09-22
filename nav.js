@@ -71,6 +71,17 @@ function buildSidebar(currentPage) {
 
   html += `</nav>`;
   sidebar.innerHTML = html;
+
+  // Close sidebar when a nav link is tapped on mobile
+  sidebar.querySelectorAll('.nav-item').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 900) {
+        sidebar.classList.remove('open');
+        const backdrop = document.querySelector('.sidebar-backdrop');
+        if (backdrop) backdrop.classList.remove('open');
+      }
+    });
+  });
 }
 
 function filterNav(q) {
