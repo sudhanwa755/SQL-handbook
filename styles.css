@@ -222,6 +222,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .topbar {
@@ -243,6 +244,7 @@ body {
   gap: 8px;
   font-size: 13px;
   color: var(--text-muted);
+  min-width: 0;
 }
 
 .topbar-breadcrumb .crumb { color: var(--text-secondary); }
@@ -862,6 +864,28 @@ code {
 ::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
+/* ============ UTILITIES ============ */
+.hamburger-btn {
+  display: none; /* shown via media query below */
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px 10px;
+  flex-shrink: 0;
+  transition: var(--transition);
+  line-height: 1;
+}
+.hamburger-btn:hover {
+  background: rgba(245,200,66,0.08);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
 /* ============ RESPONSIVE ============ */
 @media (max-width: 1024px) {
   :root { --sidebar-w: 260px; }
@@ -890,16 +914,19 @@ code {
   .topbar {
     padding: 10px 14px;
     gap: 8px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
   }
   .topbar-breadcrumb {
     font-size: 11px;
-    flex: 1;
+    flex: 1 1 100%;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    order: 3;
+    padding-left: 4px;
+    margin-top: 4px;
   }
-  .topbar-actions { gap: 6px; flex-shrink: 0; }
+  .topbar-actions { gap: 6px; flex-shrink: 0; margin-left: auto; }
   .topbar-actions .btn { padding: 5px 10px; font-size: 11px; }
   /* Hide long button text on very small screens */
   .topbar-actions .btn-primary span.btn-label { display: none; }
@@ -912,7 +939,8 @@ code {
   .hero-label { font-size: 10px; padding: 4px 12px; margin-bottom: 18px; }
   .hero-title { font-size: 30px; letter-spacing: -1px; margin-bottom: 14px; }
   .hero-desc { font-size: 14px; margin-bottom: 20px; }
-  .hero-stats { gap: 20px; }
+  .hero-stats { gap: 16px; justify-content: space-between; }
+  .stat-item { flex: 1 1 calc(50% - 20px); }
   .stat-num { font-size: 24px; }
   .stat-label { font-size: 10px; }
 
@@ -969,7 +997,7 @@ code {
   .circle-overlap { width: 44px; height: 44px; font-size: 9px; }
 
   /* Back to top */
-  .back-to-top { bottom: 16px; right: 16px; width: 36px; height: 36px; font-size: 16px; }
+  .back-to-top { display: none !important; }
 
   /* Sidebar width on mobile */
   .sidebar { width: 260px; }
@@ -990,28 +1018,6 @@ code {
   code { font-size: 11.5px; }
   .compare-table th, .compare-table td { padding: 6px 8px; font-size: 11px; }
   .hamburger-btn { font-size: 22px; }
-}
-
-/* ============ UTILITIES ============ */
-.hamburger-btn {
-  display: none; /* shown via media query above */
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-card);
-  border: 1px solid var(--border-glow);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: 20px;
-  cursor: pointer;
-  padding: 6px 10px;
-  flex-shrink: 0;
-  transition: var(--transition);
-  line-height: 1;
-}
-.hamburger-btn:hover {
-  background: rgba(245,200,66,0.08);
-  border-color: var(--accent-gold);
-  color: var(--accent-gold);
 }
 
 /* ============ ANIMATIONS ============ */
