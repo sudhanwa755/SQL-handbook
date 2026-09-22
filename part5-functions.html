@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NULL Handling, Functions & CAST — HSQLDB Handbook</title>
-<meta name="description" content="Master NULL handling with NVL and COALESCE, type conversion with CAST, string functions (CONCAT, UPPER, TRIM), date functions (TO_DATE, TO_CHAR), and math functions in HSQLDB." />
+<title>Data Transformation: Functions, NULLs & CASE Logic — HSQLDB Handbook</title>
+<meta name="description" content="Master data transformation with NULL handling (NVL, COALESCE, NULLIF), CASE expressions, type conversion (CAST), string functions (CONCAT, LPAD), date math, and numeric functions." />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -18,7 +18,7 @@
       <span class="sep">›</span>
       <span class="crumb">Part 2</span>
       <span class="sep">›</span>
-      <span class="crumb-current">NULL · Functions · CAST</span>
+      <span class="crumb-current">Data Transformation</span>
     </div>
     <div class="topbar-actions">
       <a href="part6-groupby-having.html" class="btn btn-primary">Next Chapter →</a>
@@ -29,10 +29,10 @@
 
     <div class="page-header">
       <div class="part-badge"><i data-lucide="settings" class="icon"></i> Part 2 · Chapter 5</div>
-      <h1 class="page-title">NULL Handling & Functions</h1>
+      <h1 class="page-title">Data Transformation: Functions, NULLs & CASE Logic</h1>
       <p class="page-subtitle">
         NULL behavior is one of the trickiest parts of SQL. Learn to tame it with <code>NVL</code> and <code>COALESCE</code>, 
-        then master HSQLDB's built-in string, date, math, and conversion functions.
+        write conditional logic with <code>CASE</code>, and master HSQLDB's string, date, math, and conversion functions.
       </p>
       <div class="page-meta">
         <div class="meta-item"><span class="meta-icon">⏱</span> ~30 min read</div>
@@ -182,6 +182,29 @@
       </table>
     </div>
 
+    <!-- NULLIF -->
+    <div class="topic-section">
+      <span class="section-anchor" id="nullif"></span>
+      <div class="section-header">
+        <div class="section-num">5.3a</div>
+        <h2>NULLIF — Prevent Divide-by-Zero</h2>
+      </div>
+      <p><strong>When to use:</strong> To avoid errors when dividing by a column that might contain zero. It compares two expressions and returns <code>NULL</code> if they are equal, otherwise it returns the first expression.</p>
+      <p><strong>Syntax:</strong> <code>NULLIF(expression1, expression2)</code></p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — NULLIF</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Calculate Salary to Commission ratio.</span>
+<span class="cmt">-- If Commission is 0, NULLIF makes it NULL, preventing a divide-by-zero crash.</span>
+<span class="kw">SELECT</span>
+    <span class="col">EmpName</span>,
+    <span class="col">Salary</span>,
+    <span class="col">Commission</span>,
+    <span class="col">Salary</span> <span class="op">/</span> <span class="fn">NULLIF</span>(<span class="col">Commission</span>, <span class="num">0</span>) <span class="kw">AS</span> SalaryCommRatio
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>;</code></pre>
+      </div>
+    </div>
+
     <!-- CAST -->
     <div class="topic-section">
       <span class="section-anchor" id="cast"></span>
@@ -218,6 +241,45 @@
             <tr><td>Alice Johnson earns 85000</td></tr>
             <tr><td>Bob Smith earns 55000</td></tr>
             <tr><td>Carol Wang earns 92000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CASE EXPRESSIONS -->
+    <div class="topic-section">
+      <span class="section-anchor" id="case-logic"></span>
+      <div class="section-header">
+        <div class="section-num">5.4a</div>
+        <h2>CASE Expressions — SQL's IF-THEN-ELSE</h2>
+      </div>
+      <p><strong>When to use:</strong> To apply conditional logic directly inside your <code>SELECT</code> clause. It replaces values or creates new categories on the fly without changing the underlying data.</p>
+      
+      <h3>Searched CASE (Multiple Conditions)</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Searched CASE</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- Categorize employees by salary bands</span>
+<span class="kw">SELECT</span>
+    <span class="col">EmpName</span>,
+    <span class="col">Salary</span>,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="col">Salary</span> <span class="op">>=</span> <span class="num">80000</span> <span class="kw">THEN</span> <span class="str">'High Bracket'</span>
+        <span class="kw">WHEN</span> <span class="col">Salary</span> <span class="op">>=</span> <span class="num">60000</span> <span class="kw">THEN</span> <span class="str">'Mid Bracket'</span>
+        <span class="kw">ELSE</span> <span class="str">'Entry Bracket'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> SalaryBand
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>;</code></pre>
+      </div>
+
+      <div class="result-label">Result: Categorizing with CASE</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>Salary</th><th>SalaryBand</th></tr></thead>
+          <tbody>
+            <tr><td>Alice Johnson</td><td>85000</td><td class="highlight-val">High Bracket</td></tr>
+            <tr><td>Bob Smith</td><td>55000</td><td class="highlight-val">Entry Bracket</td></tr>
+            <tr><td>Carol Wang</td><td>92000</td><td class="highlight-val">High Bracket</td></tr>
+            <tr><td>David Kumar</td><td>78000</td><td class="highlight-val">Mid Bracket</td></tr>
+            <tr><td>Eva Martinez</td><td>62000</td><td class="highlight-val">Mid Bracket</td></tr>
           </tbody>
         </table>
       </div>
@@ -309,6 +371,18 @@
           </tbody>
         </table>
       </div>
+
+      <h3>String Padding</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — LPAD and RPAD</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span>
+    <span class="col">EmpID</span>,
+    <span class="cmt">-- Pad ID with zeros up to 6 characters: '000E01'</span>
+    <span class="fn">LPAD</span>(<span class="col">EmpID</span>, <span class="num">6</span>, <span class="str">'0'</span>) <span class="kw">AS</span> PaddedID,
+    <span class="cmt">-- Masking a name: showing just the first 2 letters</span>
+    <span class="fn">RPAD</span>(<span class="fn">SUBSTRING</span>(<span class="col">EmpName</span>, <span class="num">1</span>, <span class="num">2</span>), <span class="num">6</span>, <span class="str">'*'</span>) <span class="kw">AS</span> MaskedName
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>;</code></pre>
+      </div>
     </div>
 
     <!-- DATE FUNCTIONS -->
@@ -374,6 +448,18 @@
     <span class="fn">EXTRACT</span>(<span class="kw">DAY</span>   <span class="kw">FROM</span> <span class="fn">CURRENT_DATE</span>)  <span class="kw">AS</span> CurrentDay
 <span class="kw">FROM</span>   <span class="tbl">DUAL</span>;</code></pre>
       </div>
+
+      <h3>Date Arithmetic & Intervals</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Adding and Subtracting Dates</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span>
+    <span class="col">JoinDate</span>,
+    <span class="cmt">-- Add 7 days to a date</span>
+    <span class="col">JoinDate</span> <span class="op">+</span> <span class="num">7</span> <span class="kw">AS</span> OneWeekLater,
+    <span class="cmt">-- Add 3 months using standard INTERVAL syntax</span>
+    <span class="col">JoinDate</span> <span class="op">+</span> <span class="kw">INTERVAL</span> <span class="str">'3'</span> <span class="kw">MONTH</span> <span class="kw">AS</span> ProbationEnd
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>;</code></pre>
+      </div>
     </div>
 
     <!-- MATH FUNCTIONS -->
@@ -407,8 +493,39 @@
           </tbody>
         </table>
       </div>
+    </div>
 
-      <div class="info-box key-points">
+    <!-- COMMON MISTAKES -->
+    <div class="topic-section">
+      <span class="section-anchor" id="mistakes"></span>
+      <div class="section-header">
+        <div class="section-num">5.8</div>
+        <h2>Common Mistakes with Functions & Types</h2>
+      </div>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <strong>The NULL Concatenation Trap.</strong> In Standard SQL, concatenating <em>any</em> string with NULL results in NULL. If you do <code>FirstName || ' ' || LastName</code> and <code>LastName</code> is NULL, the entire result vanishes into NULL! <strong>Fix:</strong> Always wrap risky columns in COALESCE: <code>FirstName || ' ' || COALESCE(LastName, '')</code>.
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <strong>Relying on Implicit Conversions.</strong> Never rely on the database to automatically guess how to convert a string <code>'100'</code> to an integer <code>100</code>. It behaves inconsistently across different databases (e.g. Oracle vs Postgres). <strong>Fix:</strong> Always use <code>CAST()</code> explicitly so your code is predictable and portable.
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <strong>Applying Functions in the WHERE Clause.</strong> Doing <code>WHERE UPPER(LastName) = 'SMITH'</code> forces the database to run the <code>UPPER</code> function on <em>every single row</em> before checking the condition. This destroys database indexes (known as breaking SARGability) and causes massive performance slowdowns.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box key-points">
         <div class="info-title"><i data-lucide="key" class="icon"></i> Quick Function Reference</div>
         <ul>
           <li><strong>String:</strong> <code>UPPER, LOWER, LENGTH, TRIM, LTRIM, RTRIM, SUBSTRING, POSITION, REPLACE, CONCAT (||)</code></li>
@@ -418,7 +535,6 @@
           <li><strong>Type:</strong> <code>CAST(value AS type)</code></li>
         </ul>
       </div>
-    </div>
 
   </div><!-- /content-area -->
 

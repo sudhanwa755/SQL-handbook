@@ -55,7 +55,6 @@ function buildSidebar(currentPage) {
   `;
 
   for (const section of NAV_PAGES) {
-    html += `<div class="nav-section-label" onclick="this.classList.toggle('collapsed'); this.nextElementSibling.classList.toggle('collapsed')">${section.label}</div>`;
     html += `<div class="nav-section-items">`;
     for (const item of section.items) {
       const isActive = item.href === currentPage;
