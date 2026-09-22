@@ -55,7 +55,8 @@ function buildSidebar(currentPage) {
   `;
 
   for (const section of NAV_PAGES) {
-    html += `<div class="nav-section-label">${section.label}</div>`;
+    html += `<div class="nav-section-label" onclick="this.classList.toggle('collapsed'); this.nextElementSibling.classList.toggle('collapsed')">${section.label}</div>`;
+    html += `<div class="nav-section-items">`;
     for (const item of section.items) {
       const isActive = item.href === currentPage;
       const badge = item.badge ? `<span class="nav-badge">${item.badge}</span>` : '';
@@ -66,7 +67,11 @@ function buildSidebar(currentPage) {
           ${badge}
         </a>
       `;
+      if (isActive) {
+        html += `<div id="scrollspy-container"></div>`;
+      }
     }
+    html += `</div>`;
   }
 
   html += `</nav>`;
@@ -220,9 +225,65 @@ function setupMobileAndTheme() {
   }
 }
 
+// ===== READING PROGRESS =====
+function setupProgressBar() {
+  const container = document.createElement('div');
+  container.className = 'reading-progress-container';
+  const bar = document.createElement('div');
+  bar.className = 'reading-progress-bar';
+  container.appendChild(bar);
+  document.body.appendChild(container);
+
+  window.addEventListener('scroll', () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (height > 0) ? (winScroll / height) * 100 : 0;
+    bar.style.width = scrolled + '%';
+  });
+}
+
+// ===== SCROLLSPY =====
+function setupScrollSpy() {
+  const container = document.getElementById('scrollspy-container');
+  if (!container) return;
+
+  const sections = document.querySelectorAll('.topic-section');
+  if (sections.length === 0) return;
+
+  let html = '';
+  sections.forEach((sec) => {
+    const h2 = sec.querySelector('h2');
+    const anchor = sec.querySelector('.section-anchor');
+    if (!h2 || !anchor) return;
+    const id = anchor.id;
+    const text = h2.innerText;
+    html += `<a href="#${id}" class="nav-sub-item scrollspy-link" data-target="${id}">${text}</a>`;
+  });
+
+  container.innerHTML = html;
+
+  const links = container.querySelectorAll('.scrollspy-link');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const anchor = entry.target.querySelector('.section-anchor');
+        if (anchor) {
+          const activeLink = container.querySelector(`[data-target="${anchor.id}"]`);
+          if (activeLink) activeLink.classList.add('active');
+        }
+      }
+    });
+  }, { threshold: 0.1, rootMargin: "-10% 0px -80% 0px" });
+
+  sections.forEach(sec => observer.observe(sec));
+}
+
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   setupCopyButtons();
   setupBackToTop();
   setupMobileAndTheme();
+  setupProgressBar();
+  setupScrollSpy();
 });
