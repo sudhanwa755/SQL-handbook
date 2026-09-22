@@ -156,11 +156,16 @@
         </h3>
         <ul class="index-topic-list">
           <li><a href="part7-joins.html#inner-join">7.1 INNER JOIN — matching rows only</a></li>
+          <li><a href="part7-joins.html#join-how-it-works">7.1a How a JOIN Actually Works — Row by Row</a></li>
           <li><a href="part7-joins.html#left-join">7.2 LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN</a></li>
           <li><a href="part7-joins.html#cross-join">7.3 CROSS JOIN — cartesian product</a></li>
-          <li><a href="part7-joins.html#self-join">7.4 SELF JOIN — joining a table to itself</a></li>
-          <li><a href="part7-joins.html#multi-join">7.5 Joining 3+ tables in one query</a></li>
-          <li><a href="part7-joins.html#set-operations">7.6 Set Operations: UNION, UNION ALL, INTERSECT, EXCEPT</a></li>
+          <li><a href="part7-joins.html#on-vs-where">7.4a ON vs WHERE — The Most Critical Outer Join Trap</a></li>
+          <li><a href="part7-joins.html#self-join">7.5 SELF JOIN — joining a table to itself</a></li>
+          <li><a href="part7-joins.html#self-join-deep">7.6a Self Join — "Same Table, Two Roles" (Deep Dive)</a></li>
+          <li><a href="part7-joins.html#multi-join">7.7 Joining 3+ tables in one query</a></li>
+          <li><a href="part7-joins.html#join-mistakes">7.7a Common JOIN Mistakes — Troubleshooting Guide</a></li>
+          <li><a href="part7-joins.html#join-decision">7.7b JOIN Decision Guide + SQL Execution Order</a></li>
+          <li><a href="part7-joins.html#set-operations">7.8 Set Operations: UNION, UNION ALL, INTERSECT, EXCEPT</a></li>
         </ul>
       </div>
 
@@ -170,12 +175,18 @@
           <a href="part8-subqueries-sets.html">Chapter 8: Subqueries & Advanced</a>
         </h3>
         <ul class="index-topic-list">
+          <li><a href="part8-subqueries-sets.html#what-is">8.0 What Is a Subquery?</a></li>
+          <li><a href="part8-subqueries-sets.html#subquery-mental-model">8.0a How a Subquery Executes — Visual Step-by-Step</a></li>
           <li><a href="part8-subqueries-sets.html#scalar">8.1 Scalar Subqueries — returning a single value</a></li>
           <li><a href="part8-subqueries-sets.html#multi-row">8.2 Multi-row Subqueries with IN, ANY, ALL</a></li>
           <li><a href="part8-subqueries-sets.html#correlated">8.3 Correlated Subqueries — referencing outer query</a></li>
-          <li><a href="part8-subqueries-sets.html#inline-view">8.4 Subqueries in SELECT, FROM, WHERE</a></li>
-          <li><a href="part8-subqueries-sets.html#exists">8.5 EXISTS and NOT EXISTS</a></li>
+          <li><a href="part8-subqueries-sets.html#correlated-trace">8.3a Correlated Subquery — Row-by-Row Execution Trace</a></li>
+          <li><a href="part8-subqueries-sets.html#exists">8.4 EXISTS and NOT EXISTS</a></li>
+          <li><a href="part8-subqueries-sets.html#not-in-null">8.4a The NOT IN + NULL Trap — Critical Gotcha</a></li>
+          <li><a href="part8-subqueries-sets.html#inline-view">8.5 Subqueries in SELECT, FROM, WHERE</a></li>
           <li><a href="part8-subqueries-sets.html#nested">8.6 Nested subqueries</a></li>
+          <li><a href="part8-subqueries-sets.html#subquery-having">8.7 Subquery in HAVING</a></li>
+          <li><a href="part8-subqueries-sets.html#subquery-vs-join">8.8 Subquery vs JOIN — When to Use Which</a></li>
         </ul>
       </div>
 

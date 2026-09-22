@@ -139,6 +139,114 @@
       </div>
     </div>
 
+    <!-- HOW A JOIN WORKS -->
+    <div class="topic-section">
+      <span class="section-anchor" id="join-how-it-works"></span>
+      <div class="section-header">
+        <div class="section-num">7.1a</div>
+        <h2>How a JOIN Actually Works — Row by Row</h2>
+      </div>
+      <p>Seeing the syntax is one thing. Understanding <em>how SQL processes it</em> prevents almost every join mistake. Think of it as SQL picking up each row from the left table and checking every row in the right table against the ON condition.</p>
+
+      <div class="info-box note">
+        <div class="info-title">🧠 Mental Model: The Matching Game</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">SQL goes through the left table <strong>one row at a time</strong>. For each row, it checks <em>every</em> row in the right table to see if the ON condition is satisfied. What happens when a match is found — or not — depends on the join type (INNER, LEFT, RIGHT, FULL).</p>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">Concept — How SQL Processes INNER JOIN Step by Step</span></div>
+        <pre><code><span class="cmt">Step 1: Take first row from EMPLOYEES (left table)
+        → Alice, DeptID = D10
+
+Step 2: Go through every row in DEPARTMENTS (right table)
+        D10 = IT      ← ON condition: D10 = D10? ✓ MATCH
+        D20 = HR      ← ON condition: D10 = D20? ✗ no match
+        D30 = Finance ← ON condition: D10 = D30? ✗ no match
+        D40 = Marketing ← D10 = D40? ✗ no match
+
+Step 3: INNER JOIN → keep only the matched combination
+        Result row added: Alice | IT | 85000
+
+Step 4: Move to next EMPLOYEES row (Bob, DeptID = D20)
+        ... repeat steps 1–3 for every employee ...
+
+Step 5: Grace (DeptID = NULL) finds no match
+        → NULL never equals anything (not even NULL)
+        → INNER JOIN discards Grace
+        → LEFT JOIN would KEEP Grace with NULL for dept columns</span></code></pre>
+      </div>
+
+      <h3 style="margin:20px 0 10px;">🔑 Does the Order in the ON Clause Matter?</h3>
+      <p>This is one of the most common points of confusion. These two queries look different — are they?</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Version A: e on left of equals</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span> <span class="tbl">e</span>.<span class="col">EmpID</span>, <span class="tbl">e</span>.<span class="col">EmpName</span>, <span class="tbl">d</span>.<span class="col">DeptName</span>, <span class="tbl">e</span>.<span class="col">Salary</span>
+<span class="kw">FROM</span>       <span class="tbl">EMPLOYEES</span>   <span class="tbl">e</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>
+    <span class="kw">ON</span>  <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>;</code></pre>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Version B: d on left of equals</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span> <span class="tbl">e</span>.<span class="col">EmpID</span>, <span class="tbl">e</span>.<span class="col">EmpName</span>, <span class="tbl">d</span>.<span class="col">DeptName</span>, <span class="tbl">e</span>.<span class="col">Salary</span>
+<span class="kw">FROM</span>       <span class="tbl">EMPLOYEES</span>   <span class="tbl">e</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>
+    <span class="kw">ON</span>  <span class="tbl">d</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">e</span>.<span class="col">DeptID</span>;</code></pre>
+      </div>
+
+      <div class="info-box tip">
+        <div class="info-title">✅ Both versions produce IDENTICAL results</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0 0 8px;"><strong>Why?</strong> Because equality (<code>=</code>) is <em>symmetric</em>. Just like in mathematics:</p>
+        <pre style="background:var(--bg-code); padding:12px; border-radius:6px; font-size:13px; color:var(--accent-gold); margin:0;">A = B  is identical to  B = A
+e.DeptID = d.DeptID  is identical to  d.DeptID = e.DeptID</pre>
+        <p style="font-size:14px; color:var(--text-secondary); margin:8px 0 0;">Swapping the <strong>sides of the = sign</strong> does NOT change which rows match. It is purely a matter of personal style.</p>
+      </div>
+
+      <h3 style="margin:20px 0 10px;">⚠️ But THIS Is Different — Changing the COLUMN</h3>
+      <p>Swapping sides of <code>=</code> is safe. Using a <em>different column</em> entirely is a completely different story:</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Correct vs Wrong ON Condition</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- ✅ Correct: comparing DeptID columns — related values that link the tables</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>
+    <span class="kw">ON</span> <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>
+
+<span class="cmt">-- ❌ Wrong: comparing EmpID to DeptID — unrelated columns!
+-- EmpID values: E01, E02...E07  vs  DeptID values: D10, D20, D30, D40
+-- These values NEVER match → zero rows returned (or worse: wrong rows!)</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>
+    <span class="kw">ON</span> <span class="tbl">e</span>.<span class="col">EmpID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>  <span class="cmt">-- ← logically meaningless!</span></code></pre>
+      </div>
+
+      <div class="info-box warning">
+        <div class="info-title">⚠️ The Golden Rule of ON Conditions</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">
+          <strong>Swapping sides of =:</strong> <code>e.DeptID = d.DeptID</code> vs <code>d.DeptID = e.DeptID</code> → <span style="color:var(--accent-teal);">✓ Identical result</span><br>
+          <strong>Swapping the column used:</strong> <code>e.DeptID</code> vs <code>e.EmpID</code> → <span style="color:var(--accent-coral);">✗ Completely different (wrong) result</span>
+        </p>
+      </div>
+
+      <h3 style="margin:20px 0 10px;">📊 When One Row Produces Multiple Output Rows</h3>
+      <p>A very important concept beginners miss: <strong>one left-table row can produce multiple output rows</strong> if the right table has multiple matching rows. This is correct behavior, not a bug.</p>
+
+      <div class="result-label">1-to-Many Example: IT dept (D10) has 2 projects → each IT employee appears twice</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>Relationship</th><th>Description</th><th>Output Rows</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1-to-1</strong></td><td>One employee → one dept</td><td>1 row per employee</td></tr>
+            <tr><td><strong>1-to-many</strong></td><td>One dept → many projects (D10 → P01, P04)</td><td>Each IT employee appears TWICE</td></tr>
+            <tr><td><strong>Many-to-1</strong></td><td>Many employees → one dept</td><td>Normal — one row per employee</td></tr>
+            <tr><td><strong>Many-to-many</strong></td><td>3 IT employees × 2 IT projects</td><td class="highlight-val">6 rows (3 × 2)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="info-box note">
+        <div class="info-title">📘 Why Alice Appears Twice in the 3-Table JOIN (§7.7)</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">IT has two projects (Website Redesign and AI Dashboard). Each combination of Employee + Project forms one output row. Alice (IT) + 2 projects = 2 rows. This is expected and correct.</p>
+      </div>
+    </div>
+
     <!-- LEFT JOIN -->
     <div class="topic-section">
       <span class="section-anchor" id="left-join"></span>
@@ -253,6 +361,87 @@
       </div>
     </div>
 
+    <!-- ON VS WHERE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="on-vs-where"></span>
+      <div class="section-header">
+        <div class="section-num">7.4a</div>
+        <h2>ON vs WHERE — The Most Critical Outer Join Trap</h2>
+      </div>
+      <p>This single misunderstanding causes countless incorrect SQL queries. <strong>With outer joins, WHERE and ON are NOT interchangeable.</strong> Moving a filter from ON to WHERE can silently destroy the purpose of a LEFT JOIN.</p>
+
+      <table class="compare-table">
+        <thead><tr><th>Clause</th><th>When applied</th><th>Effect on LEFT / RIGHT / FULL JOIN</th></tr></thead>
+        <tbody>
+          <tr><td><code>ON</code></td><td>During the join — defines matching rules</td><td>Unmatched outer rows still appear (with NULLs for right-table columns)</td></tr>
+          <tr><td><code>WHERE</code></td><td>After the join — filters the combined result</td><td>Removes rows with NULL right columns → effectively converts to INNER JOIN!</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:20px 0 10px;">Side-by-Side Comparison</h3>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Filter in ON: All employees, dept shown only for D10</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span> <span class="tbl">e</span>.<span class="col">EmpName</span>, <span class="tbl">d</span>.<span class="col">DeptName</span>
+<span class="kw">FROM</span>      <span class="tbl">EMPLOYEES</span>   <span class="tbl">e</span>
+<span class="kw">LEFT JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>
+    <span class="kw">ON</span>  <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>
+    <span class="kw">AND</span> <span class="tbl">d</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="str">'D10'</span>;  <span class="cmt">-- ← filter is part of ON</span></code></pre>
+      </div>
+
+      <div class="result-label">Result: All 7 employees — only D10 employees get a DeptName</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>DeptName</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td>Alice</td><td class="highlight-val">IT</td><td>D10 match ✓</td></tr>
+            <tr><td>Bob</td><td class="null-val">NULL</td><td>D20 — no D10 match, still shown</td></tr>
+            <tr><td>Carol</td><td class="highlight-val">IT</td><td>D10 match ✓</td></tr>
+            <tr><td>David</td><td class="null-val">NULL</td><td>D30 — still shown</td></tr>
+            <tr><td>Eva</td><td class="null-val">NULL</td><td>D20 — still shown</td></tr>
+            <tr><td>Frank</td><td class="null-val">NULL</td><td>D30 — still shown</td></tr>
+            <tr><td>Grace</td><td class="null-val">NULL</td><td>NULL DeptID — still shown</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Filter in WHERE: Looks similar — VERY different result!</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span> <span class="tbl">e</span>.<span class="col">EmpName</span>, <span class="tbl">d</span>.<span class="col">DeptName</span>
+<span class="kw">FROM</span>      <span class="tbl">EMPLOYEES</span>   <span class="tbl">e</span>
+<span class="kw">LEFT JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>
+    <span class="kw">ON</span>  <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>
+<span class="kw">WHERE</span> <span class="tbl">d</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="str">'D10'</span>;  <span class="cmt">-- ← filter moved to WHERE</span></code></pre>
+      </div>
+
+      <div class="result-label">Result: Only 2 rows — the LEFT JOIN silently became an INNER JOIN!</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th><th>DeptName</th></tr></thead>
+          <tbody>
+            <tr><td>Alice</td><td>IT</td></tr>
+            <tr><td>Carol</td><td>IT</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box warning">
+        <div class="info-title">⚠️ Why Did That Happen?</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0 0 8px;">The LEFT JOIN produces all 7 rows first — 6 with dept data, 1 (Grace) with NULLs. Then <code>WHERE d.DeptID = 'D10'</code> runs on this full result. It removes every row where <code>d.DeptID</code> is not <code>'D10'</code> — including all the rows where <code>d.DeptID IS NULL</code>. Result: only the 2 IT employees survive.</p>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;"><strong>Classic interview trap:</strong> "Write a LEFT JOIN that filters by department." Putting the department filter in WHERE instead of ON accidentally produces an INNER JOIN result.</p>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title"><i data-lucide="key" class="icon"></i> ON vs WHERE — The Rules</div>
+        <ul>
+          <li><strong>INNER JOIN:</strong> ON and WHERE are equivalent — there are no outer rows to lose.</li>
+          <li><strong>LEFT/RIGHT/FULL JOIN + right-table filter:</strong> Put filter in <code>ON</code> (using <code>AND</code>) to preserve outer rows with NULLs.</li>
+          <li><strong>Use WHERE after outer JOIN</strong> when you intentionally want to eliminate unmatched rows — knowing it converts to inner-join behavior.</li>
+          <li><strong>Memory trick:</strong> <em>"WHERE kills NULLs. ON preserves them."</em></li>
+        </ul>
+      </div>
+    </div>
+
     <!-- CROSS JOIN -->
     <div class="topic-section">
       <span class="section-anchor" id="cross-join"></span>
@@ -327,6 +516,94 @@
       </div>
     </div>
 
+    <!-- SELF JOIN DEEP DIVE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="self-join-deep"></span>
+      <div class="section-header">
+        <div class="section-num">7.6a</div>
+        <h2>Self Join — "Same Table, Two Roles" (Deep Dive)</h2>
+      </div>
+
+      <p>The Self Join confuses almost every beginner. Let's destroy that confusion completely.</p>
+
+      <div class="info-box note">
+        <div class="info-title">🧠 The Core Idea in One Sentence</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;"><strong>A Self Join is NOT a special keyword.</strong> It is just a regular JOIN (INNER, LEFT, or RIGHT) where <em>both sides of the join refer to the same physical table</em> — each given a different alias so SQL can tell them apart.</p>
+      </div>
+
+      <h3 style="margin:20px 0 10px;">Why Join a Table to Itself?</h3>
+      <p>Some tables store <strong>relationships within their own rows</strong>. The classic example: an EMPLOYEES table where the <code>ManagerID</code> column stores the <code>EmpID</code> of the manager — who is <em>also</em> an employee in the same table.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">Concept — Same Table, Two Roles</span></div>
+        <pre><code><span class="cmt">FROM      EMPLOYEES emp   ← the "employee copy"  (Role 1)
+LEFT JOIN EMPLOYEES mgr   ← the "manager copy"   (Role 2)
+    ON  emp.ManagerID = mgr.EmpID
+
+Both emp and mgr point to the SAME physical table.
+SQL treats them as two separate virtual copies.
+
+Translation of the ON condition:
+"Find me a row in the manager copy (mgr)
+ whose EmpID matches this employee's ManagerID."
+
+For Alice (emp row):
+  emp.ManagerID = E03
+  Scan mgr for mgr.EmpID = E03 → that's Carol
+  Match! → Output row: Alice | Carol
+
+For Carol (emp row):
+  emp.ManagerID = NULL
+  NULL matches nothing
+  No match → LEFT JOIN keeps Carol with NULL Manager</span></code></pre>
+      </div>
+
+      <div class="info-box tip">
+        <div class="info-title">💡 Why Aliases Are REQUIRED (Not Just Helpful)</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0 0 8px;">Without two distinct aliases, SQL cannot tell which copy of EmpName you mean — the employee's or the manager's. Both columns have the exact same name.</p>
+        <pre style="background:var(--bg-code); padding:12px; border-radius:6px; font-size:13px; margin:0;"><span style="color:var(--accent-coral);">-- ❌ Ambiguous — won't work or gives wrong results:</span>
+SELECT EmpName, EmpName        -- Which EmpName?
+FROM EMPLOYEES
+JOIN EMPLOYEES ON ManagerID = EmpID;  -- Which EmpID?
+
+<span style="color:var(--accent-teal);">-- ✅ Clear with meaningful aliases:</span>
+SELECT emp.EmpName AS Employee,
+       mgr.EmpName AS Manager
+FROM EMPLOYEES emp
+LEFT JOIN EMPLOYEES mgr ON emp.ManagerID = mgr.EmpID;</pre>
+      </div>
+
+      <h3 style="margin:20px 0 10px;">Self Join vs Normal Join — Key Differences</h3>
+      <table class="compare-table">
+        <thead><tr><th>Concept</th><th>Normal JOIN</th><th>Self JOIN</th></tr></thead>
+        <tbody>
+          <tr><td>Tables involved</td><td>Two <em>different</em> tables</td><td>Same table, used <em>twice with aliases</em></td></tr>
+          <tr><td>Aliases</td><td>Optional — for readability</td><td><strong>Essential — without them, queries are ambiguous</strong></td></tr>
+          <tr><td>Join keyword</td><td>INNER JOIN, LEFT JOIN, etc.</td><td>Same keywords — there is no <code>SELF JOIN</code> keyword</td></tr>
+          <tr><td>ON condition</td><td>Links columns from different tables</td><td>Links two columns within the same table (e.g. ManagerID → EmpID)</td></tr>
+          <tr><td>When to use LEFT vs INNER</td><td>Depends on requirements</td><td>LEFT JOIN: include rows with no self-reference (top-level managers, NULL ManagerID)</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:20px 0 10px;">Other Real-World Self Join Use Cases</h3>
+      <ul class="styled-list">
+        <li><strong>Category → Parent Category:</strong> A categories table where each category has a ParentCategoryID pointing to another row in the same table.</li>
+        <li><strong>Employee → Mentor:</strong> Same employee table — MentorID references another EmpID.</li>
+        <li><strong>Friend → Friend:</strong> A social network table linking UserID pairs in the same users table.</li>
+        <li><strong>City → City (Distances):</strong> A distances table where both FromCityID and ToCityID reference the same cities table.</li>
+      </ul>
+
+      <div class="info-box key-points">
+        <div class="info-title"><i data-lucide="key" class="icon"></i> Self Join Memory Tricks</div>
+        <ul>
+          <li><strong>"Same table, two roles"</strong> — give each role a meaningful alias (emp/mgr, child/parent, etc.).</li>
+          <li><strong>SELF JOIN is not a keyword.</strong> Write <code>LEFT JOIN EMPLOYEES mgr</code>, never <code>SELF JOIN EMPLOYEES</code>.</li>
+          <li>Use <strong>LEFT JOIN</strong> when some rows have no self-reference (you still want to see them with NULL for the other role).</li>
+          <li>Use <strong>INNER JOIN</strong> when you only want rows that have a valid self-reference.</li>
+        </ul>
+      </div>
+    </div>
+
     <!-- MULTI-TABLE JOIN -->
     <div class="topic-section">
       <span class="section-anchor" id="multi-join"></span>
@@ -365,6 +642,152 @@
             <tr><td>Frank</td><td>Finance</td><td>Audit System</td><td>350000</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- COMMON JOIN MISTAKES -->
+    <div class="topic-section">
+      <span class="section-anchor" id="join-mistakes"></span>
+      <div class="section-header">
+        <div class="section-num">7.7a</div>
+        <h2>Common JOIN Mistakes — Troubleshooting Guide</h2>
+      </div>
+      <p>These are the most frequent mistakes beginners make with JOINs. Each shows the wrong approach, explains why it fails, and provides the correct fix.</p>
+
+      <h3 style="margin:0 0 10px;">Mistake 1 — Wrong Column in the ON Clause</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Wrong Column</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- ❌ Wrong: EmpID compared to DeptID — completely unrelated values</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span> <span class="kw">ON</span> <span class="tbl">e</span>.<span class="col">EmpID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>
+<span class="cmt">-- EmpID values: E01..E07 vs DeptID values: D10..D40 → no rows returned!
+
+-- ✅ Correct: link the column that actually connects the tables</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span> <span class="kw">ON</span> <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>
+<span class="cmt">-- Memory trick: follow the foreign key → primary key relationship</span></code></pre>
+      </div>
+
+      <h3 style="margin:20px 0 10px;">Mistake 2 — WHERE Instead of ON with Outer Joins</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — WHERE Kills the Outer Join Effect</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- ❌ Wrong: right-table filter in WHERE eliminates outer rows</span>
+<span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="tbl">e</span>
+<span class="kw">LEFT JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span> <span class="kw">ON</span> <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>
+<span class="kw">WHERE</span> <span class="tbl">d</span>.<span class="col">DeptName</span> <span class="op">=</span> <span class="str">'IT'</span>;  <span class="cmt">-- Removes all non-IT including NULL rows!</span>
+
+<span class="cmt">-- ✅ Correct: use AND in ON to keep outer rows</span>
+<span class="kw">LEFT JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>
+    <span class="kw">ON</span> <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>
+    <span class="kw">AND</span> <span class="tbl">d</span>.<span class="col">DeptName</span> <span class="op">=</span> <span class="str">'IT'</span>;  <span class="cmt">-- Non-IT employees kept with NULL DeptName</span></code></pre>
+      </div>
+
+      <h3 style="margin:20px 0 10px;">Mistake 3 — No Aliases in Self Join</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Ambiguous Self Join</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- ❌ Wrong: SQL cannot tell which copy's column is which</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>, <span class="col">EmpName</span>  <span class="cmt">-- Ambiguous!</span>
+<span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span>
+<span class="kw">JOIN</span> <span class="tbl">EMPLOYEES</span> <span class="kw">ON</span> <span class="col">ManagerID</span> <span class="op">=</span> <span class="col">EmpID</span>;  <span class="cmt">-- Which EmpID?</span>
+
+<span class="cmt">-- ✅ Correct: give each role a meaningful alias</span>
+<span class="kw">SELECT</span> <span class="tbl">emp</span>.<span class="col">EmpName</span> <span class="kw">AS</span> Employee, <span class="tbl">mgr</span>.<span class="col">EmpName</span> <span class="kw">AS</span> Manager
+<span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="tbl">emp</span>
+<span class="kw">LEFT JOIN</span> <span class="tbl">EMPLOYEES</span> <span class="tbl">mgr</span> <span class="kw">ON</span> <span class="tbl">emp</span>.<span class="col">ManagerID</span> <span class="op">=</span> <span class="tbl">mgr</span>.<span class="col">EmpID</span>;</code></pre>
+      </div>
+
+      <h3 style="margin:20px 0 10px;">Mistake 4 — Accidental Cartesian Product (Missing ON)</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Forgotten ON Clause</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- ❌ Wrong: old comma-syntax with no condition → Cartesian product
+-- 7 employees × 4 departments = 28 nonsense rows!</span>
+<span class="kw">SELECT</span> <span class="tbl">e</span>.<span class="col">EmpName</span>, <span class="tbl">d</span>.<span class="col">DeptName</span>
+<span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="tbl">e</span>, <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span>;  <span class="cmt">-- no join condition!</span>
+
+<span class="cmt">-- ✅ Correct: always use explicit JOIN ... ON</span>
+<span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="tbl">e</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">DEPARTMENTS</span> <span class="tbl">d</span> <span class="kw">ON</span> <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">d</span>.<span class="col">DeptID</span>;</code></pre>
+      </div>
+
+      <h3 style="margin:20px 0 10px;">Mistake 5 — Surprised by Duplicate Rows (This Is Correct!)</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — 1-to-Many Produces Multiple Rows</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- "Why does Alice appear twice?"</span>
+<span class="kw">SELECT</span> <span class="tbl">e</span>.<span class="col">EmpName</span>, <span class="tbl">p</span>.<span class="col">ProjectName</span>
+<span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="tbl">e</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">PROJECTS</span> <span class="tbl">p</span> <span class="kw">ON</span> <span class="tbl">e</span>.<span class="col">DeptID</span> <span class="op">=</span> <span class="tbl">p</span>.<span class="col">DeptID</span>;
+<span class="cmt">-- Alice (IT) + Website Redesign → row 1  ✓ correct
+-- Alice (IT) + AI Dashboard    → row 2  ✓ correct (NOT a bug!)
+-- IT has 2 projects → each IT employee gets one row per project
+-- If you only want each employee once, rethink: which project?</span></code></pre>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title"><i data-lucide="key" class="icon"></i> JOIN Mistakes Quick Reference</div>
+        <ul>
+          <li><strong>Wrong ON column:</strong> Link foreign key → primary key. Check what values are actually in each column.</li>
+          <li><strong>WHERE on outer join:</strong> Right-table column filters in WHERE silently convert LEFT JOIN to INNER JOIN.</li>
+          <li><strong>Self join aliases:</strong> Without two distinct aliases, queries are ambiguous or produce wrong results.</li>
+          <li><strong>Missing ON:</strong> Two tables listed without an ON condition = full Cartesian product (M × N rows).</li>
+          <li><strong>Duplicate rows:</strong> 1-to-many relationships multiply rows — expected behavior, not a bug.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- JOIN DECISION GUIDE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="join-decision"></span>
+      <div class="section-header">
+        <div class="section-num">7.7b</div>
+        <h2>JOIN Decision Guide + SQL Execution Order</h2>
+      </div>
+
+      <h3 style="margin:0 0 12px;">Which JOIN Should I Use?</h3>
+      <table class="compare-table">
+        <thead><tr><th>You want...</th><th>Use</th><th>Memory Trick</th></tr></thead>
+        <tbody>
+          <tr><td>Only rows matching in BOTH tables</td><td><code>INNER JOIN</code></td><td>"Only mutual friends"</td></tr>
+          <tr><td>All left rows + matching right</td><td><code>LEFT JOIN</code></td><td>"Keep everyone from the left class"</td></tr>
+          <tr><td>All right rows + matching left</td><td><code>RIGHT JOIN</code></td><td>"Keep everyone from the right class"</td></tr>
+          <tr><td>All rows from both sides</td><td><code>FULL OUTER JOIN</code></td><td>"Nobody gets left out"</td></tr>
+          <tr><td>Every combination (M × N rows)</td><td><code>CROSS JOIN</code></td><td>"Everyone pairs with everyone"</td></tr>
+          <tr><td>Row related to another in same table</td><td><code>Self JOIN</code> (INNER or LEFT)</td><td>"Same table, two roles"</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:20px 0 12px;">SQL Logical Execution Order</h3>
+      <p>SQL doesn't process clauses in the order you write them. Understanding the <em>logical</em> order explains many seemingly mysterious behaviors.</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">Concept — SQL Logical Processing Order</span></div>
+        <pre><code><span class="cmt">1. FROM         → identify source tables
+2. JOIN / ON    → combine tables based on the join condition
+3. WHERE        → filter individual rows from the combined result
+4. GROUP BY     → group the filtered rows
+5. HAVING       → filter the groups (use aggregate functions here)
+6. SELECT       → compute output columns and expressions
+7. DISTINCT     → remove duplicate output rows (if used)
+8. ORDER BY     → sort the final result
+9. LIMIT/OFFSET → limit how many rows are returned
+
+─────────────────────────────────────────────────────────
+This is a LEARNING MODEL of logical order.
+The actual database engine may physically optimize differently.
+─────────────────────────────────────────────────────────
+
+Why this order matters:
+• You cannot use a SELECT alias in a WHERE clause
+  → WHERE runs BEFORE SELECT computes aliases
+• Aggregate functions go in HAVING, not WHERE
+  → WHERE runs BEFORE GROUP BY creates groups
+• Moving a filter from ON to WHERE changes outer join behavior
+  → WHERE runs AFTER the JOIN is complete</span></code></pre>
+      </div>
+
+      <div class="info-box tip">
+        <div class="info-title">💡 Three Rules That Fall Out of the Execution Order</div>
+        <ul style="font-size:14px; color:var(--text-secondary); margin:0; padding-left:16px;">
+          <li><strong>Can't use SELECT alias in WHERE:</strong> WHERE runs before SELECT — the alias doesn't exist yet.</li>
+          <li><strong>Aggregates in HAVING, not WHERE:</strong> Aggregates summarize groups — groups don't exist until after GROUP BY.</li>
+          <li><strong>ON before WHERE:</strong> The join happens first; WHERE filters the already-joined rows.</li>
+        </ul>
       </div>
     </div>
 

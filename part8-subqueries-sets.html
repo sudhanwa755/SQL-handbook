@@ -104,6 +104,65 @@
       </ul>
     </div>
 
+    <!-- SUBQUERY MENTAL MODEL -->
+    <div class="topic-section">
+      <span class="section-anchor" id="subquery-mental-model"></span>
+      <div class="section-header">
+        <div class="section-num">8.0a</div>
+        <h2>How a Subquery Executes — Visual Step-by-Step</h2>
+      </div>
+      <p>The hardest part about subqueries for beginners is understanding <em>which query runs when</em>. The answer is surprisingly simple:</p>
+
+      <div class="info-box note">
+        <div class="info-title">🧠 Core Rule: Inner Query Runs First</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">SQL always executes the <strong>innermost</strong> subquery first. Its result becomes a value (or list of values) that the outer query uses. Think of it like evaluating math: <code>(2 + 3) × 4</code> — you always solve the parentheses first.</p>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">Concept — Step-by-Step Execution Trace</span></div>
+        <pre><code><span class="cmt">Original query:
+SELECT EmpName, Salary FROM EMPLOYEES WHERE Salary > (SELECT AVG(Salary) FROM EMPLOYEES);
+
+───────────────────────────────────────────────────────────
+Step 1: SQL sees the inner subquery in parentheses.
+        It runs FIRST:
+        SELECT AVG(Salary) FROM EMPLOYEES
+        → Result: 76714.28  (one value)
+───────────────────────────────────────────────────────────
+Step 2: SQL replaces the subquery with its result.
+        The outer query becomes effectively:
+        SELECT EmpName, Salary FROM EMPLOYEES WHERE Salary > 76714.28
+───────────────────────────────────────────────────────────
+Step 3: SQL runs the outer query normally.
+        → Returns Alice (85000), Carol (92000), Frank (95000)
+───────────────────────────────────────────────────────────
+
+The subquery didn't know or care about the outer query.
+It just ran and handed back one number. Simple.</span></code></pre>
+      </div>
+
+      <h3 style="margin:20px 0 10px;">Where Can a Subquery Go?</h3>
+      <table class="compare-table">
+        <thead><tr><th>Clause</th><th>Purpose</th><th>Type of Subquery</th></tr></thead>
+        <tbody>
+          <tr><td><code>WHERE</code></td><td>Filter rows using a computed value or list</td><td>Scalar or Multi-row</td></tr>
+          <tr><td><code>SELECT</code></td><td>Compute a derived column value for each row</td><td>Scalar only (must return 1 value)</td></tr>
+          <tr><td><code>FROM</code></td><td>Treat query result as a temporary table</td><td>Any (must have alias)</td></tr>
+          <tr><td><code>HAVING</code></td><td>Filter groups using aggregate comparisons</td><td>Scalar</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info-box tip">
+        <div class="info-title">💡 Reading a Subquery — Work from the Inside Out</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0 0 8px;">When reading or writing a subquery, always start with the <strong>innermost</strong> parentheses first:</p>
+        <ol style="font-size:14px; color:var(--text-secondary); padding-left:20px; margin:0;">
+          <li>What does the inner query compute? (e.g., "the average salary")</li>
+          <li>What does the outer query do with that result? (e.g., "find employees earning more than that")</li>
+          <li>Read it in plain English: "Find employees earning more than <em>the average salary</em>."</li>
+        </ol>
+      </div>
+    </div>
+
     <!-- SCALAR SUBQUERY -->
     <div class="topic-section">
       <span class="section-anchor" id="scalar"></span>
@@ -318,6 +377,71 @@
       </div>
     </div>
 
+    <!-- CORRELATED DEEP DIVE -->
+    <div class="topic-section">
+      <span class="section-anchor" id="correlated-trace"></span>
+      <div class="section-header">
+        <div class="section-num">8.3a</div>
+        <h2>Correlated Subquery — Row-by-Row Execution Trace</h2>
+      </div>
+      <p>The correlated subquery is the hardest concept to visualize. Let's trace it completely, one outer row at a time.</p>
+
+      <div class="info-box note">
+        <div class="info-title">🧠 The Key Difference vs Uncorrelated</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;"><strong>Uncorrelated:</strong> inner query runs once → result reused for all outer rows.<br>
+        <strong>Correlated:</strong> inner query runs <em>once per outer row</em> → it uses a value from that specific outer row.</p>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">Concept — Row-by-Row Trace for the Correlated Query</span></div>
+        <pre><code><span class="cmt">Query: "Find employees earning MORE than their dept's average"
+
+Outer row 1: Alice (IT, 85000)
+  → Inner query runs: SELECT AVG(Salary) FROM EMPLOYEES WHERE Dept = 'IT'
+  → IT avg = (85000 + 92000 + 70000) / 3 = 82333
+  → 85000 > 82333? YES ✓ → Alice included
+
+Outer row 2: Bob (HR, 55000)
+  → Inner query runs: SELECT AVG(Salary) FROM EMPLOYEES WHERE Dept = 'HR'
+  → HR avg = (55000 + 62000) / 2 = 58500
+  → 55000 > 58500? NO ✗ → Bob excluded
+
+Outer row 3: Carol (IT, 92000)
+  → Inner query runs with Dept = 'IT' again: avg = 82333
+  → 92000 > 82333? YES ✓ → Carol included
+
+Outer row 4: David (Finance, 78000)
+  → Inner query runs: SELECT AVG(Salary) FROM EMPLOYEES WHERE Dept = 'Finance'
+  → Finance avg = (78000 + 95000) / 2 = 86500
+  → 78000 > 86500? NO ✗ → David excluded
+
+Outer row 5: Eva (HR, 62000)
+  → HR avg = 58500
+  → 62000 > 58500? YES ✓ → Eva included
+
+Outer row 6: Frank (Finance, 95000)
+  → Finance avg = 86500
+  → 95000 > 86500? YES ✓ → Frank included
+
+Outer row 7: Grace (IT, 70000)
+  → IT avg = 82333
+  → 70000 > 82333? NO ✗ → Grace excluded
+
+Final result: Alice, Carol, Eva, Frank</span></code></pre>
+      </div>
+
+      <div class="info-box warning">
+        <div class="info-title">⚠️ Performance Note</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0 0 8px;">The inner query ran <strong>7 times</strong> (once per outer row). With 1 million employees, that's 1 million inner executions. This is why correlated subqueries can be slow on large tables.</p>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">For production systems, you'd often rewrite this as a JOIN with a derived table or use a window function (<code>AVG(Salary) OVER (PARTITION BY Dept)</code>).</p>
+      </div>
+
+      <div class="info-box tip">
+        <div class="info-title">💡 How to Spot a Correlated Subquery</div>
+        <p style="font-size:14px; color:var(--text-secondary); margin:0;">Look for a column reference in the inner query's WHERE clause that uses the outer query's table alias (e.g., <code>e1.Dept</code> inside the inner <code>WHERE e2.Dept = e1.Dept</code>). If the inner query references the outer table → it's correlated.</p>
+      </div>
+    </div>
+
     <!-- EXISTS -->
     <div class="topic-section">
       <span class="section-anchor" id="exists"></span>
@@ -383,6 +507,79 @@
           <tr><td>Use when</td><td>Comparing against a small list</td><td>Checking for related row existence</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- NOT IN NULL TRAP -->
+    <div class="topic-section">
+      <span class="section-anchor" id="not-in-null"></span>
+      <div class="section-header">
+        <div class="section-num">8.4a</div>
+        <h2>The NOT IN + NULL Trap — Critical Gotcha</h2>
+      </div>
+      <p>This is one of the most dangerous silent bugs in SQL. <code>NOT IN</code> with a list that contains <code>NULL</code> <strong>always returns zero rows</strong> — and SQL gives you no warning.</p>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — The NOT IN NULL Bug</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="cmt">-- "Find employees who are NOT managers"
+-- This looks correct but has a hidden NULL problem:</span>
+<span class="kw">SELECT</span> <span class="col">EmpName</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">EmpID</span> <span class="kw">NOT IN</span> (
+    <span class="kw">SELECT</span> <span class="col">ManagerID</span>  <span class="cmt">-- ← ManagerID column contains NULLs!</span>
+    <span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+);
+<span class="cmt">-- Inner query returns: (E03, E05, E06, NULL, NULL, NULL)
+-- NOT IN with a NULL in the list:
+-- SQL checks: EmpID != E03 AND EmpID != E05 AND EmpID != E06 AND EmpID != NULL
+-- NULL != NULL is UNKNOWN (not FALSE, not TRUE)
+-- UNKNOWN in an AND chain = entire condition = UNKNOWN
+-- UNKNOWN is treated like FALSE → row excluded
+-- Result: ZERO rows returned! Every employee is excluded!</span></code></pre>
+      </div>
+
+      <div class="result-label">NOT IN with NULLs — returns 0 rows (wrong!)</div>
+      <div class="result-table-wrap">
+        <table class="result-table">
+          <thead><tr><th>EmpName</th></tr></thead>
+          <tbody><tr><td class="null-val" style="text-align:center; font-style:italic;">No rows returned ← silent bug!</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Fix 1: Filter NULLs before NOT IN</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span> <span class="col">EmpName</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">EmpID</span> <span class="kw">NOT IN</span> (
+    <span class="kw">SELECT</span> <span class="col">ManagerID</span>
+    <span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+    <span class="kw">WHERE</span>  <span class="col">ManagerID</span> <span class="kw">IS NOT NULL</span>  <span class="cmt">-- ← exclude NULLs from the list</span>
+);
+<span class="cmt">-- Now inner query returns: (E03, E05, E06) — no NULLs
+-- NOT IN works correctly again</span></code></pre>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Fix 2: Use NOT EXISTS (always safe with NULLs)</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span> <span class="tbl">e1</span>.<span class="col">EmpName</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span> <span class="tbl">e1</span>
+<span class="kw">WHERE</span>  <span class="kw">NOT EXISTS</span> (
+    <span class="kw">SELECT</span> <span class="num">1</span>
+    <span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span> <span class="tbl">e2</span>
+    <span class="kw">WHERE</span>  <span class="tbl">e2</span>.<span class="col">ManagerID</span> <span class="op">=</span> <span class="tbl">e1</span>.<span class="col">EmpID</span>
+);
+<span class="cmt">-- NOT EXISTS checks row-by-row, not against a list with NULLs
+-- NULL ManagerIDs never match e1.EmpID → does not affect the result
+-- Correctly returns: Alice, Bob, David, Grace</span></code></pre>
+      </div>
+
+      <div class="info-box key-points">
+        <div class="info-title"><i data-lucide="key" class="icon"></i> NOT IN vs NOT EXISTS — Rules</div>
+        <ul>
+          <li><strong>NOT IN (subquery that might have NULLs):</strong> <span style="color:var(--accent-coral);">Dangerous — returns 0 rows silently.</span> Always add <code>WHERE col IS NOT NULL</code> inside the subquery.</li>
+          <li><strong>NOT EXISTS:</strong> <span style="color:var(--accent-teal);">Always safe — NULL-proof by design.</span> Preferred when the subquery column could be NULL.</li>
+          <li><strong>Memory trick:</strong> <em>"NOT IN hates NULLs. NOT EXISTS ignores them."</em></li>
+        </ul>
+      </div>
     </div>
 
     <!-- SUBQUERY IN FROM -->
@@ -533,6 +730,60 @@
           <li>Using <code>NOT IN</code> when the subquery might return NULLs — <code>NOT IN (1, 2, NULL)</code> always returns no rows! Use <code>NOT EXISTS</code> instead.</li>
           <li>Forgetting to alias subqueries in the FROM clause.</li>
           <li>Deeply nested subqueries are hard to read — consider rewriting as JOINs or Common Table Expressions (CTEs) for clarity.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SUBQUERY VS JOIN DECISION -->
+    <div class="topic-section">
+      <span class="section-anchor" id="subquery-vs-join"></span>
+      <div class="section-header">
+        <div class="section-num">8.8</div>
+        <h2>Subquery vs JOIN — When to Use Which</h2>
+      </div>
+      <p>Both subqueries and JOINs can often solve the same problem. Knowing when to use each makes your SQL cleaner and faster.</p>
+
+      <table class="compare-table">
+        <thead><tr><th>Situation</th><th>Use</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Need a single derived value for comparison (e.g., average)</td><td><code>Scalar Subquery</code></td><td>Clean, readable</td></tr>
+          <tr><td>Check if ANY related row exists</td><td><code>EXISTS</code> or <code>IN</code></td><td>Subquery is cleaner; EXISTS is faster</td></tr>
+          <tr><td>Check if NO related row exists</td><td><code>NOT EXISTS</code></td><td>Safer than NOT IN (NULL-proof)</td></tr>
+          <tr><td>Need columns from BOTH tables in result</td><td><code>JOIN</code></td><td>Subqueries can't easily return columns from two tables</td></tr>
+          <tr><td>Aggregation over groups, then filter groups</td><td><code>Derived table in FROM</code> or <code>CTE</code></td><td>Can't use WHERE on aggregate aliases</td></tr>
+          <tr><td>Compare each row to its own group's aggregate</td><td><code>Correlated Subquery</code></td><td>But consider window functions for large tables</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:20px 0 10px;">Same Result, Two Approaches</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — Subquery Version: Employees who are managers</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT</span> <span class="col">EmpName</span>
+<span class="kw">FROM</span>   <span class="tbl">EMPLOYEES</span>
+<span class="kw">WHERE</span>  <span class="col">EmpID</span> <span class="kw">IN</span> (
+    <span class="kw">SELECT DISTINCT</span> <span class="col">ManagerID</span> <span class="kw">FROM</span> <span class="tbl">EMPLOYEES</span> <span class="kw">WHERE</span> <span class="col">ManagerID</span> <span class="kw">IS NOT NULL</span>
+);</code></pre>
+      </div>
+
+      <div class="code-block-wrap">
+        <div class="code-header"><span class="code-lang">SQL — JOIN Version: Same result using a self-join</span><button class="code-copy">Copy</button></div>
+        <pre><code><span class="kw">SELECT DISTINCT</span> <span class="tbl">mgr</span>.<span class="col">EmpName</span>
+<span class="kw">FROM</span>      <span class="tbl">EMPLOYEES</span> <span class="tbl">emp</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">EMPLOYEES</span> <span class="tbl">mgr</span>
+    <span class="kw">ON</span> <span class="tbl">emp</span>.<span class="col">ManagerID</span> <span class="op">=</span> <span class="tbl">mgr</span>.<span class="col">EmpID</span>;
+<span class="cmt">-- JOIN is more natural here if you also want manager details.
+-- Subquery is more natural if you only need a yes/no existence check.</span></code></pre>
+      </div>
+
+      <h3 style="margin:20px 0 10px;">Common Subquery Mistakes — Quick Reference</h3>
+      <div class="info-box mistakes">
+        <div class="info-title">⚠️ Common Subquery Mistakes</div>
+        <ul>
+          <li><strong>= with multi-row subquery:</strong> <code>WHERE Salary = (SELECT Salary FROM ...)</code> → error if inner returns multiple rows. Use <code>IN</code>.</li>
+          <li><strong>NOT IN with NULLs:</strong> Always add <code>IS NOT NULL</code> inside the subquery, or use <code>NOT EXISTS</code>.</li>
+          <li><strong>Missing alias on FROM subquery:</strong> <code>FROM (SELECT ...) </code>— the alias after the closing parenthesis is required.</li>
+          <li><strong>Correlated query on huge tables:</strong> If the inner query runs for every outer row, consider rewriting with a JOIN + GROUP BY or a window function.</li>
+          <li><strong>Deeply nested subqueries:</strong> Hard to read, hard to debug. Refactor to a CTE (<code>WITH dept_avg AS (SELECT ...)</code>) for clarity.</li>
         </ul>
       </div>
     </div>
