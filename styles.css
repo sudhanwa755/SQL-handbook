@@ -285,6 +285,26 @@ body {
   padding: 50px 60px;
   max-width: var(--content-max);
   width: 100%;
+  margin: 0 auto;
+}
+
+/* ============ SIDEBAR BACKDROP ============ */
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 90; /* Just below sidebar's 100 */
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--transition);
+}
+.sidebar-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* ============ PAGE HEADER ============ */
@@ -853,12 +873,18 @@ code {
   .sidebar { transform: translateX(-100%); box-shadow: 2px 0 20px rgba(0,0,0,0.3); }
   .sidebar.open { transform: translateX(0); }
   .main-content { margin-left: 0; }
+  .topbar { padding: 14px 20px; }
   .content-area { padding: 30px 20px; }
   .hero-section { padding: 40px 20px 30px; }
+  .hero-title { font-size: 42px; }
+  .hero-desc { font-size: 16px; }
   .page-nav-footer { padding: 20px; flex-direction: column; }
   .nav-link-card { max-width: 100%; }
   .toc-grid { grid-template-columns: 1fr; }
   .hamburger-btn { display: block; }
+  .page-title { font-size: 36px; }
+  h2 { font-size: 26px; }
+  .concept-grid { grid-template-columns: 1fr; }
 }
 
 /* ============ UTILITIES ============ */

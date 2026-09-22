@@ -158,15 +158,29 @@ function setupMobileAndTheme() {
   // Sidebar toggle logic
   const sidebar = document.getElementById('sidebar');
   if (sidebar) {
-    hamburger.addEventListener('click', () => {
+    // Create backdrop for mobile sidebar
+    const backdrop = document.createElement('div');
+    backdrop.className = 'sidebar-backdrop';
+    document.body.appendChild(backdrop);
+
+    hamburger.addEventListener('click', (e) => {
       sidebar.classList.toggle('open');
+      backdrop.classList.toggle('open');
+      e.stopPropagation();
     });
 
-    // Close sidebar if clicking outside
+    // Close sidebar if clicking backdrop or outside
     document.addEventListener('click', (e) => {
       if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !hamburger.contains(e.target)) {
         sidebar.classList.remove('open');
+        backdrop.classList.remove('open');
       }
+    });
+    
+    // Also close on backdrop click specifically
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('open');
     });
   }
 
