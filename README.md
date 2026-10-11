@@ -92,7 +92,7 @@ Since there is no backend, server, or build step required, running this project 
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/your-username/sql-handbook.git
+   git clone https://github.com/sudhanwa755/sql-handbook.git
    ```
 2. **Open the Project:**
    Navigate to the folder and simply double-click `index.html` to open it in your default web browser.
