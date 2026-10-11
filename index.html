@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HSQLDB Complete Handbook — Table of Contents</title>
-<meta name="description" content="A comprehensive, beautifully structured HSQLDB/SQL handbook covering normalization, keys, constraints, DDL, DML, queries, joins, subqueries, and more." />
+<title>The SQL Handbook — Spatial Interactive Edition</title>
+<meta name="description" content="A comprehensive, beautifully structured HSQLDB/SQL spatial handbook covering normalization, keys, constraints, DDL, DML, queries, joins, subqueries, and more." />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -25,223 +25,722 @@
     </div>
   </header>
 
-  <!-- HERO -->
+  <!-- HERO SECTION -->
   <section class="hero-section animate-in">
-    <div class="hero-label"><i data-lucide="sparkles" class="icon"></i> Complete Reference Guide</div>
-    <h1 class="hero-title">The HSQLDB<br /><span class="accent">Handbook</span></h1>
+    <h1 class="hero-title">The Definitive<br /><span class="accent">SQL Handbook</span></h1>
     <p class="hero-desc">
-      A comprehensive, teacher-crafted SQL textbook covering everything from database theory to advanced subqueries. 
-      Every concept comes with an explanation, key points, mistakes to avoid, example queries, and <strong>result tables</strong>.
+      A teacher-crafted relational database engineering textbook covering database theory, normal forms, 
+      schema constraints, and complex multi-table analytical queries. Every topic includes concrete explanations, 
+      interview gotchas, and <strong>live visual result tables</strong>.
     </p>
+
+    <!-- Hero Action Bar -->
+    <div class="hero-actions">
+      <a href="part1-normalization.html" class="hero-btn-primary">
+        <i data-lucide="play" class="icon"></i> Start Chapter 1
+      </a>
+      <a href="#tocSection" class="hero-btn-secondary">
+        <i data-lucide="compass" class="icon"></i> Explore All 8 Chapters
+      </a>
+      <a href="#commandRefSection" class="hero-btn-secondary">
+        <i data-lucide="zap" class="icon"></i> SQL Command Matrix
+      </a>
+    </div>
+
+    <!-- Floating Metric HUD -->
     <div class="hero-stats">
       <div class="stat-item">
-        <span class="stat-num">8</span>
-        <span class="stat-label">Chapters</span>
+        <div class="stat-icon"><i data-lucide="book-open" class="icon"></i></div>
+        <div class="stat-data">
+          <span class="stat-num">8</span>
+          <span class="stat-label">Chapters</span>
+        </div>
       </div>
       <div class="stat-item">
-        <span class="stat-num">6</span>
-        <span class="stat-label">Parts</span>
+        <div class="stat-icon"><i data-lucide="layers" class="icon"></i></div>
+        <div class="stat-data">
+          <span class="stat-num">6</span>
+          <span class="stat-label">Parts</span>
+        </div>
       </div>
       <div class="stat-item">
-        <span class="stat-num">60+</span>
-        <span class="stat-label">Topics</span>
+        <div class="stat-icon"><i data-lucide="file-code" class="icon"></i></div>
+        <div class="stat-data">
+          <span class="stat-num">60+</span>
+          <span class="stat-label">Topics</span>
+        </div>
       </div>
       <div class="stat-item">
-        <span class="stat-num">100+</span>
-        <span class="stat-label">Examples</span>
+        <div class="stat-icon"><i data-lucide="database" class="icon"></i></div>
+        <div class="stat-data">
+          <span class="stat-num">100+</span>
+          <span class="stat-label">Live Queries</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- TABLE OF CONTENTS GRID -->
-  <section class="content-area" style="max-width:1100px;">
+  <!-- TABLE OF CONTENTS (MODERN SPATIAL CHAPTER CARDS) -->
+  <section class="content-area" id="tocSection">
 
-    <div style="margin-bottom:32px;">
-      <h2 style="font-family:'Fraunces',serif; font-size:28px; color:var(--text-heading); margin-bottom:8px;"><i data-lucide="book-open" class="icon"></i> Table of Contents</h2>
-      <p style="color:var(--text-muted); font-size:14px;">Click any chapter to jump directly to it. Topics are ordered from beginner to advanced.</p>
+    <div class="toc-section-header">
+      <div class="toc-heading-group">
+        <h2><i data-lucide="book-marked" class="icon"></i> Curriculum & Table of Contents</h2>
+        <p class="toc-heading-desc">Select any chapter to jump directly to it. Use the part filters to narrow topics.</p>
+      </div>
+      
+      <!-- Interactive Segmented Part Filter -->
+      <div class="part-filter-bar">
+        <button class="filter-pill active" data-filter="all">All Chapters</button>
+        <button class="filter-pill" data-filter="part-1">Part 1 · Theory</button>
+        <button class="filter-pill" data-filter="part-2">Part 2 · Querying</button>
+        <button class="filter-pill" data-filter="part-3">Part 3 · Aggregation</button>
+        <button class="filter-pill" data-filter="part-4">Part 4 · Multi-Table</button>
+      </div>
     </div>
 
-    <div class="book-index">
+    <!-- Chapter Grid (Responsive 2-Col on Desktop, 1-Col on Mobile) -->
+    <div class="chapter-grid">
       
-      <div class="index-chapter">
-        <h3 class="index-chapter-title">
-          <span class="chapter-part">Part 1</span>
-          <a href="part1-normalization.html">Chapter 1: Database Normalization</a>
-        </h3>
-        <ul class="index-topic-list">
-          <li><a href="part1-normalization.html#why">1.1 What is normalization and why it matters</a></li>
-          <li><a href="part1-normalization.html#1nf">1.2 First Normal Form (1NF) — atomic values</a></li>
-          <li><a href="part1-normalization.html#2nf">1.3 Second Normal Form (2NF) — no partial dependency</a></li>
-          <li><a href="part1-normalization.html#3nf">1.4 Third Normal Form (3NF) — no transitive dependency</a></li>
-          <li><a href="part1-normalization.html#identify">1.5 Identifying which NF a table is in (with examples)</a></li>
+      <!-- CHAPTER 1 -->
+      <div class="chapter-card" data-part="part-1">
+        <div class="chapter-card-header">
+          <div class="chapter-card-icon"><i data-lucide="ruler" class="icon"></i></div>
+          <div class="chapter-card-meta">
+            <div class="chapter-card-tags">
+              <span class="chapter-part-tag">Part 1 · Theory</span>
+              <span class="chapter-time-tag"><i data-lucide="clock" class="icon"></i> ~20 min</span>
+            </div>
+            <h3 class="chapter-card-title">
+              <a href="part1-normalization.html">Chapter 1: Database Normalization</a>
+            </h3>
+          </div>
+        </div>
+        <ul class="chapter-topics-list">
+          <li>
+            <a href="part1-normalization.html#why" class="topic-link-item">
+              <span class="topic-chip-num">1.1</span>
+              <span class="topic-chip-title">What is normalization & why it matters</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part1-normalization.html#1nf" class="topic-link-item">
+              <span class="topic-chip-num">1.2</span>
+              <span class="topic-chip-title">First Normal Form (1NF) — atomic values</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part1-normalization.html#2nf" class="topic-link-item">
+              <span class="topic-chip-num">1.3</span>
+              <span class="topic-chip-title">Second Normal Form (2NF) — partial dependency</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part1-normalization.html#3nf" class="topic-link-item">
+              <span class="topic-chip-num">1.4</span>
+              <span class="topic-chip-title">Third Normal Form (3NF) — transitive dependency</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part1-normalization.html#identify" class="topic-link-item">
+              <span class="topic-chip-num">1.5</span>
+              <span class="topic-chip-title">Identifying table normal forms with examples</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
         </ul>
+        <div class="chapter-card-footer">
+          <span style="font-size:12px; color:var(--text-muted);">5 Sections · 1NF–3NF</span>
+          <a href="part1-normalization.html" class="chapter-explore-btn">
+            Explore Chapter <i data-lucide="arrow-right" class="icon"></i>
+          </a>
+        </div>
       </div>
 
-      <div class="index-chapter">
-        <h3 class="index-chapter-title">
-          <span class="chapter-part">Part 1</span>
-          <a href="part2-keys-constraints.html">Chapter 2: Keys & Constraints</a>
-        </h3>
-        <ul class="index-topic-list">
-          <li><a href="part2-keys-constraints.html#keys-overview">2.1 Super Key, Candidate Key, Primary Key</a></li>
-          <li><a href="part2-keys-constraints.html#alternate-key">2.2 Alternate Key, Foreign Key, Composite Key</a></li>
-          <li><a href="part2-keys-constraints.html#not-null">2.3 NOT NULL, UNIQUE, CHECK constraints</a></li>
-          <li><a href="part2-keys-constraints.html#default">2.4 DEFAULT constraint with examples</a></li>
-          <li><a href="part2-keys-constraints.html#constraints-overview">2.5 How to combine multiple constraints</a></li>
+      <!-- CHAPTER 2 -->
+      <div class="chapter-card" data-part="part-1">
+        <div class="chapter-card-header">
+          <div class="chapter-card-icon"><i data-lucide="key" class="icon"></i></div>
+          <div class="chapter-card-meta">
+            <div class="chapter-card-tags">
+              <span class="chapter-part-tag">Part 1 · Theory</span>
+              <span class="chapter-time-tag"><i data-lucide="clock" class="icon"></i> ~25 min</span>
+            </div>
+            <h3 class="chapter-card-title">
+              <a href="part2-keys-constraints.html">Chapter 2: Keys & Constraints</a>
+            </h3>
+          </div>
+        </div>
+        <ul class="chapter-topics-list">
+          <li>
+            <a href="part2-keys-constraints.html#keys-overview" class="topic-link-item">
+              <span class="topic-chip-num">2.1</span>
+              <span class="topic-chip-title">Super Key, Candidate Key, Primary Key</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part2-keys-constraints.html#alternate-key" class="topic-link-item">
+              <span class="topic-chip-num">2.2</span>
+              <span class="topic-chip-title">Alternate Key, Foreign Key, Composite Key</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part2-keys-constraints.html#not-null" class="topic-link-item">
+              <span class="topic-chip-num">2.3</span>
+              <span class="topic-chip-title">NOT NULL, UNIQUE, CHECK constraints</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part2-keys-constraints.html#default" class="topic-link-item">
+              <span class="topic-chip-num">2.4</span>
+              <span class="topic-chip-title">DEFAULT constraint with practical examples</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part2-keys-constraints.html#constraints-overview" class="topic-link-item">
+              <span class="topic-chip-num">2.5</span>
+              <span class="topic-chip-title">Combining multiple table constraints</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
         </ul>
+        <div class="chapter-card-footer">
+          <span style="font-size:12px; color:var(--text-muted);">6 Key Types · 5 Constraints</span>
+          <a href="part2-keys-constraints.html" class="chapter-explore-btn">
+            Explore Chapter <i data-lucide="arrow-right" class="icon"></i>
+          </a>
+        </div>
       </div>
 
-      <div class="index-chapter">
-        <h3 class="index-chapter-title">
-          <span class="chapter-part">Part 1</span>
-          <a href="part3-ddl-dml-tcl.html">Chapter 3: DDL · DML · TCL</a>
-        </h3>
-        <ul class="index-topic-list">
-          <li><a href="part3-ddl-dml-tcl.html#ddl">3.1 CREATE TABLE, ALTER TABLE, DROP TABLE</a></li>
-          <li><a href="part3-ddl-dml-tcl.html#insert">3.2 INSERT INTO (single & multi-row)</a></li>
-          <li><a href="part3-ddl-dml-tcl.html#update">3.3 UPDATE with WHERE conditions</a></li>
-          <li><a href="part3-ddl-dml-tcl.html#delete">3.4 DELETE and TRUNCATE</a></li>
-          <li><a href="part3-ddl-dml-tcl.html#tcl">3.5 COMMIT, ROLLBACK, SAVEPOINT</a></li>
+      <!-- CHAPTER 3 -->
+      <div class="chapter-card" data-part="part-1">
+        <div class="chapter-card-header">
+          <div class="chapter-card-icon"><i data-lucide="wrench" class="icon"></i></div>
+          <div class="chapter-card-meta">
+            <div class="chapter-card-tags">
+              <span class="chapter-part-tag">Part 1 · Theory</span>
+              <span class="chapter-time-tag"><i data-lucide="clock" class="icon"></i> ~25 min</span>
+            </div>
+            <h3 class="chapter-card-title">
+              <a href="part3-ddl-dml-tcl.html">Chapter 3: DDL · DML · TCL</a>
+            </h3>
+          </div>
+        </div>
+        <ul class="chapter-topics-list">
+          <li>
+            <a href="part3-ddl-dml-tcl.html#ddl" class="topic-link-item">
+              <span class="topic-chip-num">3.1</span>
+              <span class="topic-chip-title">CREATE TABLE, ALTER TABLE, DROP TABLE</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part3-ddl-dml-tcl.html#insert" class="topic-link-item">
+              <span class="topic-chip-num">3.2</span>
+              <span class="topic-chip-title">INSERT INTO (single & multi-row syntax)</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part3-ddl-dml-tcl.html#update" class="topic-link-item">
+              <span class="topic-chip-num">3.3</span>
+              <span class="topic-chip-title">UPDATE statements with WHERE conditions</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part3-ddl-dml-tcl.html#delete" class="topic-link-item">
+              <span class="topic-chip-num">3.4</span>
+              <span class="topic-chip-title">DELETE vs TRUNCATE (the critical difference)</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part3-ddl-dml-tcl.html#tcl" class="topic-link-item">
+              <span class="topic-chip-num">3.5</span>
+              <span class="topic-chip-title">COMMIT, ROLLBACK, SAVEPOINT in transactions</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
         </ul>
+        <div class="chapter-card-footer">
+          <span style="font-size:12px; color:var(--text-muted);">Schema & Transactions</span>
+          <a href="part3-ddl-dml-tcl.html" class="chapter-explore-btn">
+            Explore Chapter <i data-lucide="arrow-right" class="icon"></i>
+          </a>
+        </div>
       </div>
 
-      <div class="index-chapter">
-        <h3 class="index-chapter-title">
-          <span class="chapter-part">Part 2</span>
-          <a href="part4-select-where.html">Chapter 4: SELECT · WHERE · ORDER BY</a>
-        </h3>
-        <ul class="index-topic-list">
-          <li><a href="part4-select-where.html#select">4.1 SELECT, FROM, DISTINCT clauses</a></li>
-          <li><a href="part4-select-where.html#where">4.2 WHERE with all comparison operators</a></li>
-          <li><a href="part4-select-where.html#and-or-brackets">4.3 AND / OR logic — brackets vs bracket-less</a></li>
-          <li><a href="part4-select-where.html#between">4.4 BETWEEN, IN, IS NULL conditions</a></li>
-          <li><a href="part4-select-where.html#like">4.5 LIKE pattern matching (% and _)</a></li>
-          <li><a href="part4-select-where.html#order-by">4.6 ORDER BY single/multi-column, ASC/DESC</a></li>
+      <!-- CHAPTER 4 -->
+      <div class="chapter-card" data-part="part-2">
+        <div class="chapter-card-header">
+          <div class="chapter-card-icon"><i data-lucide="search" class="icon"></i></div>
+          <div class="chapter-card-meta">
+            <div class="chapter-card-tags">
+              <span class="chapter-part-tag" style="background:rgba(96,165,250,0.12);color:var(--accent-blue);border-color:rgba(96,165,250,0.3);">Part 2 · Querying</span>
+              <span class="chapter-time-tag"><i data-lucide="clock" class="icon"></i> ~30 min</span>
+            </div>
+            <h3 class="chapter-card-title">
+              <a href="part4-select-where.html">Chapter 4: SELECT · WHERE · ORDER BY</a>
+            </h3>
+          </div>
+        </div>
+        <ul class="chapter-topics-list">
+          <li>
+            <a href="part4-select-where.html#select" class="topic-link-item">
+              <span class="topic-chip-num">4.1</span>
+              <span class="topic-chip-title">SELECT, FROM, and DISTINCT clauses</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part4-select-where.html#where" class="topic-link-item">
+              <span class="topic-chip-num">4.2</span>
+              <span class="topic-chip-title">WHERE with comparison operators</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part4-select-where.html#and-or-brackets" class="topic-link-item">
+              <span class="topic-chip-num">4.3</span>
+              <span class="topic-chip-title">AND / OR logic — brackets vs bracket-less</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part4-select-where.html#between" class="topic-link-item">
+              <span class="topic-chip-num">4.4</span>
+              <span class="topic-chip-title">BETWEEN, IN, and IS NULL conditions</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part4-select-where.html#like" class="topic-link-item">
+              <span class="topic-chip-num">4.5</span>
+              <span class="topic-chip-title">LIKE pattern matching with % and _</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part4-select-where.html#order-by" class="topic-link-item">
+              <span class="topic-chip-num">4.6</span>
+              <span class="topic-chip-title">ORDER BY single/multi-column, ASC/DESC</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
         </ul>
+        <div class="chapter-card-footer">
+          <span style="font-size:12px; color:var(--text-muted);">6 Filtering Patterns</span>
+          <a href="part4-select-where.html" class="chapter-explore-btn">
+            Explore Chapter <i data-lucide="arrow-right" class="icon"></i>
+          </a>
+        </div>
       </div>
 
-      <div class="index-chapter">
-        <h3 class="index-chapter-title">
-          <span class="chapter-part">Part 2</span>
-          <a href="part5-functions.html">Chapter 5: Data Transformation: Functions, NULLs & CASE Logic</a>
-        </h3>
-        <ul class="index-topic-list">
-          <li><a href="part5-functions.html#null-behavior">5.1 NULL — what it is and how it behaves</a></li>
-          <li><a href="part5-functions.html#nvl">5.2 NVL and COALESCE for NULL replacement</a></li>
-          <li><a href="part5-functions.html#nullif">5.3a NULLIF — Prevent Divide-by-Zero</a></li>
-          <li><a href="part5-functions.html#cast">5.4 CAST for type conversion</a></li>
-          <li><a href="part5-functions.html#case-logic">5.4a CASE Expressions — SQL's IF-THEN-ELSE</a></li>
-          <li><a href="part5-functions.html#string-functions">5.5 String functions: CONCAT, UPPER, LPAD, RTRIM</a></li>
-          <li><a href="part5-functions.html#date-functions">5.6 Date functions: TO_CHAR, TO_DATE, Math</a></li>
-          <li><a href="part5-functions.html#math-functions">5.7 Math functions: ROUND, FLOOR, CEIL, MOD</a></li>
-          <li><a href="part5-functions.html#mistakes">5.8 Common Mistakes with Functions & Types</a></li>
+      <!-- CHAPTER 5 -->
+      <div class="chapter-card" data-part="part-2">
+        <div class="chapter-card-header">
+          <div class="chapter-card-icon"><i data-lucide="settings" class="icon"></i></div>
+          <div class="chapter-card-meta">
+            <div class="chapter-card-tags">
+              <span class="chapter-part-tag" style="background:rgba(96,165,250,0.12);color:var(--accent-blue);border-color:rgba(96,165,250,0.3);">Part 2 · Querying</span>
+              <span class="chapter-time-tag"><i data-lucide="clock" class="icon"></i> ~35 min</span>
+            </div>
+            <h3 class="chapter-card-title">
+              <a href="part5-functions.html">Chapter 5: Functions, NULLs & CASE Logic</a>
+            </h3>
+          </div>
+        </div>
+        <ul class="chapter-topics-list">
+          <li>
+            <a href="part5-functions.html#null-behavior" class="topic-link-item">
+              <span class="topic-chip-num">5.1</span>
+              <span class="topic-chip-title">NULL mechanics — truth tables & gotchas</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part5-functions.html#nvl" class="topic-link-item">
+              <span class="topic-chip-num">5.2</span>
+              <span class="topic-chip-title">NVL and COALESCE fallback resolution</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part5-functions.html#case-logic" class="topic-link-item">
+              <span class="topic-chip-num">5.4a</span>
+              <span class="topic-chip-title">CASE Expressions — SQL's IF-THEN-ELSE</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part5-functions.html#string-functions" class="topic-link-item">
+              <span class="topic-chip-num">5.5</span>
+              <span class="topic-chip-title">String transformation: CONCAT, UPPER, LPAD</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part5-functions.html#date-functions" class="topic-link-item">
+              <span class="topic-chip-num">5.6</span>
+              <span class="topic-chip-title">Date & time: TO_CHAR, TO_DATE, arithmetic</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
         </ul>
+        <div class="chapter-card-footer">
+          <span style="font-size:12px; color:var(--text-muted);">9 Transformation Tools</span>
+          <a href="part5-functions.html" class="chapter-explore-btn">
+            Explore Chapter <i data-lucide="arrow-right" class="icon"></i>
+          </a>
+        </div>
       </div>
 
-      <div class="index-chapter">
-        <h3 class="index-chapter-title">
-          <span class="chapter-part">Part 3</span>
-          <a href="part6-groupby-having.html">Chapter 6: GROUP BY & HAVING</a>
-        </h3>
-        <ul class="index-topic-list">
-          <li><a href="part6-groupby-having.html#aggregate">6.1 Aggregate functions: COUNT, SUM, AVG, MIN, MAX</a></li>
-          <li><a href="part6-groupby-having.html#group-by">6.2 GROUP BY — grouping rows by column values</a></li>
-          <li><a href="part6-groupby-having.html#having">6.3 HAVING — filtering aggregated groups</a></li>
-          <li><a href="part6-groupby-having.html#where-vs-having">6.4 WHERE vs HAVING — exact difference with examples</a></li>
-          <li><a href="part6-groupby-having.html#count-distinct">6.5 Combining WHERE + GROUP BY + HAVING</a></li>
+      <!-- CHAPTER 6 -->
+      <div class="chapter-card" data-part="part-3">
+        <div class="chapter-card-header">
+          <div class="chapter-card-icon"><i data-lucide="bar-chart-2" class="icon"></i></div>
+          <div class="chapter-card-meta">
+            <div class="chapter-card-tags">
+              <span class="chapter-part-tag" style="background:rgba(45,212,191,0.12);color:var(--accent-teal);border-color:rgba(45,212,191,0.3);">Part 3 · Aggregation</span>
+              <span class="chapter-time-tag"><i data-lucide="clock" class="icon"></i> ~25 min</span>
+            </div>
+            <h3 class="chapter-card-title">
+              <a href="part6-groupby-having.html">Chapter 6: GROUP BY & HAVING</a>
+            </h3>
+          </div>
+        </div>
+        <ul class="chapter-topics-list">
+          <li>
+            <a href="part6-groupby-having.html#aggregate" class="topic-link-item">
+              <span class="topic-chip-num">6.1</span>
+              <span class="topic-chip-title">Aggregate functions: COUNT, SUM, AVG, MIN, MAX</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part6-groupby-having.html#group-by" class="topic-link-item">
+              <span class="topic-chip-num">6.2</span>
+              <span class="topic-chip-title">GROUP BY — grouping rows by column keys</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part6-groupby-having.html#having" class="topic-link-item">
+              <span class="topic-chip-num">6.3</span>
+              <span class="topic-chip-title">HAVING — filtering aggregated groups</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part6-groupby-having.html#where-vs-having" class="topic-link-item">
+              <span class="topic-chip-num">6.4</span>
+              <span class="topic-chip-title">WHERE vs HAVING — execution order difference</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part6-groupby-having.html#count-distinct" class="topic-link-item">
+              <span class="topic-chip-num">6.5</span>
+              <span class="topic-chip-title">Combining WHERE + GROUP BY + HAVING</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
         </ul>
+        <div class="chapter-card-footer">
+          <span style="font-size:12px; color:var(--text-muted);">Aggregation & Group Filtering</span>
+          <a href="part6-groupby-having.html" class="chapter-explore-btn">
+            Explore Chapter <i data-lucide="arrow-right" class="icon"></i>
+          </a>
+        </div>
       </div>
 
-      <div class="index-chapter">
-        <h3 class="index-chapter-title">
-          <span class="chapter-part">Part 4</span>
-          <a href="part7-joins.html">Chapter 7: Joins & Multi-Table Queries</a>
-        </h3>
-        <ul class="index-topic-list">
-          <li><a href="part7-joins.html#inner-join">7.1 INNER JOIN — matching rows only</a></li>
-          <li><a href="part7-joins.html#join-how-it-works">7.1a How a JOIN Actually Works — Row by Row</a></li>
-          <li><a href="part7-joins.html#left-join">7.2 LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN</a></li>
-          <li><a href="part7-joins.html#cross-join">7.3 CROSS JOIN — cartesian product</a></li>
-          <li><a href="part7-joins.html#on-vs-where">7.4a ON vs WHERE — The Most Critical Outer Join Trap</a></li>
-          <li><a href="part7-joins.html#self-join">7.5 SELF JOIN — joining a table to itself</a></li>
-          <li><a href="part7-joins.html#self-join-deep">7.6a Self Join — "Same Table, Two Roles" (Deep Dive)</a></li>
-          <li><a href="part7-joins.html#multi-join">7.7 Joining 3+ tables in one query</a></li>
-          <li><a href="part7-joins.html#join-mistakes">7.7a Common JOIN Mistakes — Troubleshooting Guide</a></li>
-          <li><a href="part7-joins.html#join-decision">7.7b JOIN Decision Guide + SQL Execution Order</a></li>
-          <li><a href="part7-joins.html#set-operations">7.8 Set Operations: UNION, UNION ALL, INTERSECT, EXCEPT</a></li>
+      <!-- CHAPTER 7 -->
+      <div class="chapter-card" data-part="part-4">
+        <div class="chapter-card-header">
+          <div class="chapter-card-icon"><i data-lucide="link" class="icon"></i></div>
+          <div class="chapter-card-meta">
+            <div class="chapter-card-tags">
+              <span class="chapter-part-tag" style="background:rgba(251,191,36,0.12);color:var(--accent-gold);border-color:rgba(251,191,36,0.3);">Part 4 · Multi-Table</span>
+              <span class="chapter-time-tag"><i data-lucide="clock" class="icon"></i> ~45 min</span>
+            </div>
+            <h3 class="chapter-card-title">
+              <a href="part7-joins.html">Chapter 7: Joins & Multi-Table Queries</a>
+            </h3>
+          </div>
+        </div>
+        <ul class="chapter-topics-list">
+          <li>
+            <a href="part7-joins.html#inner-join" class="topic-link-item">
+              <span class="topic-chip-num">7.1</span>
+              <span class="topic-chip-title">INNER JOIN — matching rows and row mechanics</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part7-joins.html#left-join" class="topic-link-item">
+              <span class="topic-chip-num">7.2</span>
+              <span class="topic-chip-title">LEFT, RIGHT, and FULL OUTER joins</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part7-joins.html#on-vs-where" class="topic-link-item">
+              <span class="topic-chip-num">7.4a</span>
+              <span class="topic-chip-title">ON vs WHERE — The critical outer join trap</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part7-joins.html#self-join" class="topic-link-item">
+              <span class="topic-chip-num">7.5</span>
+              <span class="topic-chip-title">SELF JOIN — "Same table, two roles" deep dive</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part7-joins.html#set-operations" class="topic-link-item">
+              <span class="topic-chip-num">7.8</span>
+              <span class="topic-chip-title">UNION, UNION ALL, INTERSECT, EXCEPT</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
         </ul>
+        <div class="chapter-card-footer">
+          <span style="font-size:12px; color:var(--text-muted);">7 Join Variations · Set Logic</span>
+          <a href="part7-joins.html" class="chapter-explore-btn">
+            Explore Chapter <i data-lucide="arrow-right" class="icon"></i>
+          </a>
+        </div>
       </div>
 
-      <div class="index-chapter">
-        <h3 class="index-chapter-title">
-          <span class="chapter-part">Part 4</span>
-          <a href="part8-subqueries-sets.html">Chapter 8: Subqueries & Advanced</a>
-        </h3>
-        <ul class="index-topic-list">
-          <li><a href="part8-subqueries-sets.html#what-is">8.0 What Is a Subquery?</a></li>
-          <li><a href="part8-subqueries-sets.html#subquery-mental-model">8.0a How a Subquery Executes — Visual Step-by-Step</a></li>
-          <li><a href="part8-subqueries-sets.html#scalar">8.1 Scalar Subqueries — returning a single value</a></li>
-          <li><a href="part8-subqueries-sets.html#multi-row">8.2 Multi-row Subqueries with IN, ANY, ALL</a></li>
-          <li><a href="part8-subqueries-sets.html#correlated">8.3 Correlated Subqueries — referencing outer query</a></li>
-          <li><a href="part8-subqueries-sets.html#correlated-trace">8.3a Correlated Subquery — Row-by-Row Execution Trace</a></li>
-          <li><a href="part8-subqueries-sets.html#exists">8.4 EXISTS and NOT EXISTS</a></li>
-          <li><a href="part8-subqueries-sets.html#not-in-null">8.4a The NOT IN + NULL Trap — Critical Gotcha</a></li>
-          <li><a href="part8-subqueries-sets.html#inline-view">8.5 Subqueries in SELECT, FROM, WHERE</a></li>
-          <li><a href="part8-subqueries-sets.html#nested">8.6 Nested subqueries</a></li>
-          <li><a href="part8-subqueries-sets.html#subquery-having">8.7 Subquery in HAVING</a></li>
-          <li><a href="part8-subqueries-sets.html#subquery-vs-join">8.8 Subquery vs JOIN — When to Use Which</a></li>
+      <!-- CHAPTER 8 -->
+      <div class="chapter-card" data-part="part-4">
+        <div class="chapter-card-header">
+          <div class="chapter-card-icon"><i data-lucide="puzzle" class="icon"></i></div>
+          <div class="chapter-card-meta">
+            <div class="chapter-card-tags">
+              <span class="chapter-part-tag" style="background:rgba(251,191,36,0.12);color:var(--accent-gold);border-color:rgba(251,191,36,0.3);">Part 4 · Advanced</span>
+              <span class="chapter-time-tag"><i data-lucide="clock" class="icon"></i> ~40 min</span>
+            </div>
+            <h3 class="chapter-card-title">
+              <a href="part8-subqueries-sets.html">Chapter 8: Subqueries & Advanced Sets</a>
+            </h3>
+          </div>
+        </div>
+        <ul class="chapter-topics-list">
+          <li>
+            <a href="part8-subqueries-sets.html#scalar" class="topic-link-item">
+              <span class="topic-chip-num">8.1</span>
+              <span class="topic-chip-title">Scalar Subqueries — single value output</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part8-subqueries-sets.html#multi-row" class="topic-link-item">
+              <span class="topic-chip-num">8.2</span>
+              <span class="topic-chip-title">Multi-row Subqueries with IN, ANY, ALL</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part8-subqueries-sets.html#correlated" class="topic-link-item">
+              <span class="topic-chip-num">8.3</span>
+              <span class="topic-chip-title">Correlated Subqueries — row-by-row tracing</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part8-subqueries-sets.html#exists" class="topic-link-item">
+              <span class="topic-chip-num">8.4</span>
+              <span class="topic-chip-title">EXISTS vs NOT EXISTS (NULL-safe testing)</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
+          <li>
+            <a href="part8-subqueries-sets.html#subquery-vs-join" class="topic-link-item">
+              <span class="topic-chip-num">8.8</span>
+              <span class="topic-chip-title">Subquery vs JOIN — When to use which</span>
+              <span class="topic-chip-arrow">→</span>
+            </a>
+          </li>
         </ul>
+        <div class="chapter-card-footer">
+          <span style="font-size:12px; color:var(--text-muted);">9 Advanced Patterns · Optimizations</span>
+          <a href="part8-subqueries-sets.html" class="chapter-explore-btn">
+            Explore Chapter <i data-lucide="arrow-right" class="icon"></i>
+          </a>
+        </div>
       </div>
 
     </div>
 
     <div class="divider"></div>
 
-    <!-- Quick Reference -->
-    <h3 style="font-family:'Fraunces',serif; font-size:24px; color:var(--text-heading); margin-bottom:20px;"><i data-lucide="zap" class="icon"></i> Quick Reference — SQL Command Categories</h3>
+    <!-- MODERN SQL COMMANDS REPRESENTATION (MATRIX CARDS & DATA TABLE) -->
+    <div id="commandRefSection">
+      
+      <div class="table-section-header">
+        <div>
+          <h2><i data-lucide="zap" class="icon"></i> SQL Command Categories Matrix</h2>
+          <p style="color:var(--text-muted); font-size:14px; margin-top:6px;">
+            Core syntax categories, transactional controls, and definition languages. Click any chip to copy.
+          </p>
+        </div>
 
-    <table class="compare-table">
-      <thead>
-        <tr>
-          <th>Category</th>
-          <th>Full Name</th>
-          <th>Commands</th>
-          <th>Purpose</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="tag tag-gold">DDL</span></td>
-          <td>Data Definition Language</td>
-          <td><code>CREATE, ALTER, DROP, TRUNCATE</code></td>
-          <td>Define or modify database structure</td>
-        </tr>
-        <tr>
-          <td><span class="tag tag-green">DML</span></td>
-          <td>Data Manipulation Language</td>
-          <td><code>INSERT, UPDATE, DELETE</code></td>
-          <td>Manipulate the data inside tables</td>
-        </tr>
-        <tr>
-          <td><span class="tag tag-violet">DQL</span></td>
-          <td>Data Query Language</td>
-          <td><code>SELECT</code></td>
-          <td>Retrieve data from tables</td>
-        </tr>
-        <tr>
-          <td><span class="tag tag-red">TCL</span></td>
-          <td>Transaction Control Language</td>
-          <td><code>COMMIT, ROLLBACK, SAVEPOINT</code></td>
-          <td>Control the outcome of transactions</td>
-        </tr>
-        <tr>
-          <td><span class="tag" style="background:rgba(91,163,245,0.15);color:var(--accent-blue);">DCL</span></td>
-          <td>Data Control Language</td>
-          <td><code>GRANT, REVOKE</code></td>
-          <td>Manage permissions and access</td>
-        </tr>
-      </tbody>
-    </table>
+        <!-- View Switcher -->
+        <div class="view-toggle-bar">
+          <button class="view-toggle-btn active" data-view="grid">
+            <i data-lucide="layout-grid" class="icon"></i> Matrix Cards
+          </button>
+          <button class="view-toggle-btn" data-view="table">
+            <i data-lucide="table" class="icon"></i> Data Table
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 1: MODERN SPATIAL COMMAND MATRIX CARDS -->
+      <div class="command-matrix-grid" id="commandGridView">
+        
+        <!-- DDL -->
+        <div class="command-card" data-cat="DDL">
+          <div class="command-card-header">
+            <span class="command-cat-tag">DDL</span>
+            <span style="font-size:11px; color:var(--text-dim);"><i data-lucide="box" class="icon"></i> Structure</span>
+          </div>
+          <div class="command-full-title">Data Definition Language</div>
+          <div class="command-desc">Defines, modifies, and alters the physical structure and metadata of relational database objects.</div>
+          <div class="command-chips-tray">
+            <span class="cmd-chip" title="Click to copy">CREATE</span>
+            <span class="cmd-chip" title="Click to copy">ALTER</span>
+            <span class="cmd-chip" title="Click to copy">DROP</span>
+            <span class="cmd-chip" title="Click to copy">TRUNCATE</span>
+          </div>
+        </div>
+
+        <!-- DML -->
+        <div class="command-card" data-cat="DML">
+          <div class="command-card-header">
+            <span class="command-cat-tag">DML</span>
+            <span style="font-size:11px; color:var(--text-dim);"><i data-lucide="edit-3" class="icon"></i> Data Rows</span>
+          </div>
+          <div class="command-full-title">Data Manipulation Language</div>
+          <div class="command-desc">Manipulates the actual rows and values stored inside existing database tables.</div>
+          <div class="command-chips-tray">
+            <span class="cmd-chip" title="Click to copy">INSERT</span>
+            <span class="cmd-chip" title="Click to copy">UPDATE</span>
+            <span class="cmd-chip" title="Click to copy">DELETE</span>
+          </div>
+        </div>
+
+        <!-- DQL -->
+        <div class="command-card" data-cat="DQL">
+          <div class="command-card-header">
+            <span class="command-cat-tag">DQL</span>
+            <span style="font-size:11px; color:var(--text-dim);"><i data-lucide="search" class="icon"></i> Retrieval</span>
+          </div>
+          <div class="command-full-title">Data Query Language</div>
+          <div class="command-desc">Queries, filters, joins, aggregates, and retrieves record sets from one or multiple tables.</div>
+          <div class="command-chips-tray">
+            <span class="cmd-chip" title="Click to copy">SELECT</span>
+          </div>
+        </div>
+
+        <!-- TCL -->
+        <div class="command-card" data-cat="TCL">
+          <div class="command-card-header">
+            <span class="command-cat-tag">TCL</span>
+            <span style="font-size:11px; color:var(--text-dim);"><i data-lucide="shield" class="icon"></i> Transaction</span>
+          </div>
+          <div class="command-full-title">Transaction Control Language</div>
+          <div class="command-desc">Maintains atomic transactions, rollbacks, and points of recovery for data integrity.</div>
+          <div class="command-chips-tray">
+            <span class="cmd-chip" title="Click to copy">COMMIT</span>
+            <span class="cmd-chip" title="Click to copy">ROLLBACK</span>
+            <span class="cmd-chip" title="Click to copy">SAVEPOINT</span>
+          </div>
+        </div>
+
+        <!-- DCL -->
+        <div class="command-card" data-cat="DCL">
+          <div class="command-card-header">
+            <span class="command-cat-tag">DCL</span>
+            <span style="font-size:11px; color:var(--text-dim);"><i data-lucide="lock" class="icon"></i> Security</span>
+          </div>
+          <div class="command-full-title">Data Control Language</div>
+          <div class="command-desc">Controls authorization, role assignments, grants, and security privileges on database entities.</div>
+          <div class="command-chips-tray">
+            <span class="cmd-chip" title="Click to copy">GRANT</span>
+            <span class="cmd-chip" title="Click to copy">REVOKE</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- VIEW 2: MODERN SPATIAL GLASS DATA TABLE (TOGGLED) -->
+      <div class="table-chrome" id="commandTableView" style="display:none;">
+        <div class="table-chrome-header">
+          <div class="table-chrome-title">
+            <i data-lucide="table" class="icon"></i> Classification Matrix
+          </div>
+          <div class="table-scroll-hint">
+            <i data-lucide="move-horizontal" class="icon"></i> Scroll horizontally
+          </div>
+        </div>
+        
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th style="width:110px;">Category</th>
+              <th>Full Name</th>
+              <th>Commands</th>
+              <th>Purpose & Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-gold">DDL</span></td>
+              <td><strong>Data Definition Language</strong></td>
+              <td><code>CREATE, ALTER, DROP, TRUNCATE</code></td>
+              <td>Defines or alters database structure and table definitions</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-green">DML</span></td>
+              <td><strong>Data Manipulation Language</strong></td>
+              <td><code>INSERT, UPDATE, DELETE</code></td>
+              <td>Manipulates records and values stored inside tables</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-violet">DQL</span></td>
+              <td><strong>Data Query Language</strong></td>
+              <td><code>SELECT</code></td>
+              <td>Retrieves and projects data sets without modifying data</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-red">TCL</span></td>
+              <td><strong>Transaction Control Language</strong></td>
+              <td><code>COMMIT, ROLLBACK, SAVEPOINT</code></td>
+              <td>Guarantees atomic transactions and rollbacks</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-blue">DCL</span></td>
+              <td><strong>Data Control Language</strong></td>
+              <td><code>GRANT, REVOKE</code></td>
+              <td>Manages user privileges, roles, and security access</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
 
   </section>
 
@@ -251,7 +750,7 @@
     <a href="part1-normalization.html" class="nav-link-card next">
       <div class="nlc-arrow">→</div>
       <div>
-        <div class="nlc-label">Chapter 1</div>
+        <div class="nlc-label">Start Learning · Chapter 1</div>
         <div class="nlc-title">Database Normalization</div>
       </div>
     </a>
@@ -259,13 +758,16 @@
 
 </div>
 
-<button class="back-to-top" id="backToTop">↑</button>
+<!-- FLOATING BACK TO TOP -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
 
 <script src="nav.js"></script>
 <script>
   buildSidebar('index.html');
 </script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script>lucide.createIcons();</script>
+<script>
+  lucide.createIcons();
+</script>
 </body>
 </html>

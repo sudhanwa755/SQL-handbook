@@ -40,6 +40,7 @@
         <div class="meta-item"><span class="meta-icon">⏱</span> ~20 min read</div>
         <div class="meta-item"><span class="meta-icon">🎯</span> Beginner</div>
         <div class="meta-item"><span class="meta-icon">📋</span> 5 sections</div>
+        <a href="#chapterQuizSection" class="meta-item" style="text-decoration:none; color:var(--accent-cyan);"><i data-lucide="award" class="icon"></i> 20-Q Chapter Quiz</a>
       </div>
     </div>
 
@@ -391,6 +392,9 @@
       </table>
     </div>
 
+  <!-- CHAPTER 1 MASTERY QUIZ (20 QUESTIONS: 7 EASY, 7 MEDIUM, 6 QUERY) -->
+  <div id="chapter-quiz-mount" data-chapter="part1"></div>
+
   </div><!-- /content-area -->
 
   <div class="page-nav-footer">
@@ -416,6 +420,8 @@
 
 <script src="nav.js"></script>
 <script>buildSidebar('part1-normalization.html');</script>
+<script src="quiz-data.js"></script>
+<script src="quiz.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>lucide.createIcons();</script>
 </body>
