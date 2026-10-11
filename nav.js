@@ -599,7 +599,7 @@ function setupScrollSpy() {
       html += `
         <a href="#${id}" class="timeline-topic-node scrollspy-link" data-target="${id}">
           <span class="timeline-dot"></span>
-          ${numText ? `<span class="timeline-topic-num">${numText}</span>` : ''}
+          ${numText ? `<span class="timeline-topic-num">${numText}</span> ` : ''}
           <span class="timeline-topic-label">${label}</span>
         </a>
       `;
