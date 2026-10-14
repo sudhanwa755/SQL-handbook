@@ -1,0 +1,13 @@
+/*
+  # Force HTTPS & Strict Transport Security (HSTS)
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  # Prevent MIME-type sniffing
+  X-Content-Type-Options: nosniff
+  # Prevent Clickjacking / Framing
+  X-Frame-Options: SAMEORIGIN
+  # Control Referrer Information
+  Referrer-Policy: strict-origin-when-cross-origin
+  # Granular Permissions Policy
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  # Content Security Policy (enforcing HTTPS upgrades)
+  Content-Security-Policy: upgrade-insecure-requests;

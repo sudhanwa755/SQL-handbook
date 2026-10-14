@@ -1,0 +1,10 @@
+# ==============================================================================
+# ROBOTS.TXT FOR THE SQL HANDBOOK
+# https://sudhanwa755.github.io/SQL-handbook/
+# ==============================================================================
+
+User-agent: *
+Allow: /
+
+# Sitemap Location
+Sitemap: https://sudhanwa755.github.io/SQL-handbook/sitemap.xml

@@ -725,8 +725,502 @@ function setupTableScrollHints() {
   window.addEventListener('resize', checkOverflow);
 }
 
+// ===== 16. FORCE HTTPS REDIRECT =====
+function enforceHTTPS() {
+  if (
+    window.location.protocol === 'http:' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1' &&
+    !window.location.hostname.endsWith('.local')
+  ) {
+    window.location.href = window.location.href.replace(/^http:/, 'https:');
+  }
+}
+
+// ===== 17. PRIVACY-PRESERVING ANALYTICS MODULE =====
+const Analytics = {
+  initialized: false,
+
+  init() {
+    // Respect Do Not Track header
+    if (navigator.doNotTrack === '1' || window.doNotTrack === '1') {
+      console.info('[Analytics] Respecting Do Not Track (DNT) signal. Tracking disabled.');
+      return;
+    }
+
+    // Check cookie consent
+    const consent = localStorage.getItem('sql_cookie_consent');
+    if (consent !== 'all') {
+      return; // Only load telemetry if user gave consent
+    }
+
+    this.initialized = true;
+    this.trackPageView();
+    this.setupScrollDepthTracking();
+  },
+
+  trackPageView() {
+    const page = window.location.pathname.split('/').pop() || 'index.html';
+    this.trackEvent('Navigation', 'page_view', page);
+  },
+
+  trackEvent(category, action, label = '', value = 0) {
+    if (!this.initialized && localStorage.getItem('sql_cookie_consent') !== 'all') return;
+
+    // Dispatch custom event for extensible integrations (GA4, Cloudflare, Plausible)
+    const eventDetail = { category, action, label, value, timestamp: Date.now() };
+    window.dispatchEvent(new CustomEvent('sql_analytics_event', { detail: eventDetail }));
+
+    // Support standard Google Analytics gtag if installed
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', action, {
+        event_category: category,
+        event_label: label,
+        value: value
+      });
+    }
+
+    // Support Cloudflare Beacon or Plausible if installed
+    if (typeof window.plausible === 'function') {
+      window.plausible(action, { props: { category, label } });
+    }
+  },
+
+  setupScrollDepthTracking() {
+    let tracked50 = false;
+    let tracked90 = false;
+
+    window.addEventListener('scroll', () => {
+      const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+      if (scrollPercent >= 50 && !tracked50) {
+        tracked50 = true;
+        this.trackEvent('Engagement', 'scroll_depth_50', window.location.pathname);
+      }
+      if (scrollPercent >= 90 && !tracked90) {
+        tracked90 = true;
+        this.trackEvent('Engagement', 'scroll_depth_completed', window.location.pathname);
+      }
+    }, { passive: true });
+  }
+};
+
+// ===== 18. SPATIAL COOKIE CONSENT BANNER =====
+function setupCookieConsent() {
+  const existingChoice = localStorage.getItem('sql_cookie_consent');
+  if (existingChoice) {
+    if (existingChoice === 'all') {
+      Analytics.init();
+    }
+    return;
+  }
+
+  // Create banner DOM
+  let banner = document.getElementById('cookieConsentBar');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'cookieConsentBar';
+    banner.className = 'cookie-consent-bar';
+    banner.setAttribute('role', 'dialog');
+    banner.setAttribute('aria-label', 'Cookie and privacy preferences');
+    banner.innerHTML = `
+      <div class="cookie-content-wrap">
+        <div class="cookie-icon-orb">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"></path>
+            <path d="M8.5 8.5v.01"></path>
+            <path d="M16 15.5v.01"></path>
+            <path d="M12 12v.01"></path>
+            <path d="M11 17v.01"></path>
+            <path d="M7 13v.01"></path>
+          </svg>
+        </div>
+        <div class="cookie-text-col">
+          <div class="cookie-title">Privacy & Local Storage</div>
+          <p class="cookie-desc">
+            We use on-device local storage to save your dark/light theme and chapter quiz scores. 
+            No sensitive personal data is collected or sold.
+          </p>
+          <div class="cookie-actions-row">
+            <button class="cookie-btn-accept" id="btnAcceptCookies">Accept All</button>
+            <button class="cookie-btn-essential" id="btnEssentialCookies">Essential Only</button>
+            <a href="privacy.html" class="cookie-btn-link" onclick="openLegalModal('privacy'); return false;">Privacy Policy</a>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(banner);
+  }
+
+  // Delay display slightly for smooth page entrance
+  setTimeout(() => {
+    banner.style.display = 'block';
+  }, 1200);
+
+  document.getElementById('btnAcceptCookies')?.addEventListener('click', () => {
+    localStorage.setItem('sql_cookie_consent', 'all');
+    banner.style.display = 'none';
+    Analytics.init();
+  });
+
+  document.getElementById('btnEssentialCookies')?.addEventListener('click', () => {
+    localStorage.setItem('sql_cookie_consent', 'essential');
+    banner.style.display = 'none';
+  });
+}
+
+// Global hook to reopen cookie settings from footer or modal
+window.reopenCookieSettings = function() {
+  openLegalModal('cookies');
+};
+
+// ===== 19. FORM VALIDATION & BOT/SPAM PROTECTION =====
+function setupInteractiveForms() {
+  document.querySelectorAll('form.needs-validation').forEach(form => {
+    // Record timestamp when form was rendered to detect instant bot submissions
+    form.dataset.renderedAt = Date.now().toString();
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      let isValid = true;
+      const statusAlert = form.querySelector('.form-status-alert');
+
+      // 1. Bot Honeypot Check
+      const honeypot = form.querySelector('input[name="_honeypot"]');
+      if (honeypot && honeypot.value.trim() !== '') {
+        console.warn('[Anti-Spam] Bot detected via honeypot field.');
+        // Fake success to misdirect bot
+        if (statusAlert) {
+          statusAlert.className = 'form-status-alert alert-success';
+          statusAlert.style.display = 'block';
+          statusAlert.textContent = 'Feedback received! Thank you for helping improve the handbook.';
+        }
+        form.reset();
+        return;
+      }
+
+      // 2. Bot Time-to-Submit Verification (Must take > 2.0 seconds)
+      const renderedAt = parseInt(form.dataset.renderedAt || '0', 10);
+      const elapsed = Date.now() - renderedAt;
+      if (elapsed < 2000) {
+        console.warn('[Anti-Spam] Bot detected: submission too rapid (' + elapsed + 'ms).');
+        return;
+      }
+
+      // 3. Field-by-Field Input Validation
+      const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
+      inputs.forEach(input => {
+        const value = input.value.trim();
+        let fieldValid = true;
+
+        if (!value) {
+          fieldValid = false;
+        } else if (input.type === 'email') {
+          // Standard RFC compliant email regex
+          const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/;
+          if (!emailRegex.test(value)) {
+            fieldValid = false;
+          }
+        }
+
+        if (!fieldValid) {
+          input.classList.add('is-invalid');
+          input.classList.remove('is-valid');
+          isValid = false;
+        } else {
+          input.classList.remove('is-invalid');
+          input.classList.add('is-valid');
+        }
+      });
+
+      if (isValid) {
+        if (statusAlert) {
+          statusAlert.className = 'form-status-alert alert-success';
+          statusAlert.style.display = 'block';
+          statusAlert.innerHTML = '<span style="font-weight:700;">✓ Submission Confirmed!</span> Thank you for your feedback.';
+        }
+
+        Analytics.trackEvent('Form', 'feedback_submitted', form.id || 'general_form');
+        form.reset();
+        inputs.forEach(i => i.classList.remove('is-valid'));
+
+        // Refresh timestamp
+        form.dataset.renderedAt = Date.now().toString();
+      }
+    });
+
+    // Clear invalid class on live input
+    form.querySelectorAll('input, textarea').forEach(input => {
+      input.addEventListener('input', () => {
+        if (input.classList.contains('is-invalid')) {
+          input.classList.remove('is-invalid');
+        }
+      });
+    });
+  });
+}
+
+// ===== 20. MASTER SITE FOOTER INJECTION (CLEAN BOTTOM BAR) =====
+function setupMasterFooter() {
+  if (document.querySelector('.site-master-footer')) return;
+
+  const mainContent = document.querySelector('.main-content');
+  if (!mainContent) return;
+
+  const footer = document.createElement('footer');
+  footer.className = 'site-master-footer';
+  footer.innerHTML = `
+    <div class="footer-bottom-row" style="border-top:none; padding-top:0;">
+      <div>
+        © 2026 The SQL Handbook. Created by 
+        <a href="https://github.com/sudhanwa755" target="_blank" rel="noopener noreferrer" style="color:var(--accent-cyan); font-weight:600;">@sudhanwa755</a>. 
+        Open source under MIT License.
+      </div>
+      <div class="footer-legal-links">
+        <a href="privacy.html" onclick="openLegalModal('privacy'); return false;">Privacy</a>
+        <span>·</span>
+        <a href="terms.html" onclick="openLegalModal('terms'); return false;">Terms</a>
+        <span>·</span>
+        <a href="404.html">404</a>
+        <span>·</span>
+        <a href="https://github.com/sudhanwa755/SQL-handbook" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span>·</span>
+        <a href="sitemap.xml">Sitemap</a>
+        <span>·</span>
+        <a href="javascript:void(0)" onclick="openLegalModal('cookies')">Cookie Preferences</a>
+      </div>
+    </div>
+  `;
+
+  mainContent.appendChild(footer);
+}
+
+// ===== 21. IN-PAGE SPATIAL LEGAL & COOKIE MODAL ENGINE (APPEARS AS A DIV) =====
+function openLegalModal(tab = 'privacy') {
+  let overlay = document.getElementById('legalModalOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'legalModalOverlay';
+    overlay.className = 'spatial-modal-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.onclick = (e) => {
+      if (e.target === overlay) closeLegalModal();
+    };
+    document.body.appendChild(overlay);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('open')) {
+        closeLegalModal();
+      }
+    });
+  }
+
+  renderModalContent(tab);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLegalModal() {
+  const overlay = document.getElementById('legalModalOverlay');
+  if (overlay) {
+    overlay.classList.remove('open');
+  }
+  document.body.style.overflow = '';
+}
+
+function renderModalContent(activeTab) {
+  const overlay = document.getElementById('legalModalOverlay');
+  if (!overlay) return;
+
+  const tabs = [
+    { id: 'privacy', label: 'Privacy Policy' },
+    { id: 'terms', label: 'Terms & Conditions' },
+    { id: 'cookies', label: 'Cookie Preferences' }
+  ];
+
+  let tabButtons = tabs.map(t => `
+    <button class="spatial-modal-tab-btn${activeTab === t.id ? ' active' : ''}" onclick="renderModalContent('${t.id}')">
+      ${t.label}
+    </button>
+  `).join('');
+
+  let title = 'Privacy & Legal Transparency';
+  let bodyHtml = '';
+
+  if (activeTab === 'privacy') {
+    title = 'Privacy Policy';
+    bodyHtml = `
+      <h3>1. Zero Personal Profiling & Monetization</h3>
+      <p>
+        The SQL Handbook is an open-source educational platform engineered with a strict privacy-first architecture. 
+        We do not collect names, emails, passwords, phone numbers, or demographic profiles. You can access all 8 chapters 
+        and 160 assessment questions without registering or signing in.
+      </p>
+
+      <h3>2. Client-Side Local Storage</h3>
+      <p>
+        We store essential functional preferences inside your browser's <code>localStorage</code> API. This data never leaves your computer:
+      </p>
+      <ul>
+        <li><code>theme</code>: Remembers whether you prefer Dark Mode or Daylight Mode.</li>
+        <li><code>sql_quiz_*</code>: Saves your chapter quiz answer selections and final test scores locally so you can review your performance.</li>
+        <li><code>sql_cookie_consent</code>: Remembers your telemetry preference (<code>'all'</code> or <code>'essential'</code>).</li>
+      </ul>
+
+      <h3>3. Interactive Data Wipe</h3>
+      <p>You have full authority over all data saved on your machine:</p>
+      <div style="display:flex; gap:10px; margin:14px 0; flex-wrap:wrap;">
+        <button class="btn btn-secondary" style="min-height:38px; padding:6px 14px; font-size:13px;" onclick="modalInspectStorage()">Inspect Stored Keys</button>
+        <button class="btn btn-danger" style="min-height:38px; padding:6px 14px; font-size:13px;" onclick="modalWipeStorage()">Wipe All Local Data</button>
+      </div>
+      <div id="modalStorageStatus" style="font-size:13px; color:var(--accent-teal); display:none; padding:8px 12px; background:var(--glass-pill); border-radius:8px;"></div>
+
+      <h3>4. GDPR & CCPA/CPRA Rights</h3>
+      <p>
+        Under statutory privacy laws (GDPR, CCPA/CPRA), you have the right to access and delete your personal data. 
+        Because our servers retain no personal records, you can execute this right immediately at any time via the wipe button above.
+      </p>
+    `;
+  } else if (activeTab === 'terms') {
+    title = 'Terms & Conditions';
+    bodyHtml = `
+      <h3>1. Educational Open-Source Platform</h3>
+      <p>
+        The SQL Handbook is provided free of charge for students, database administrators, and software engineers. 
+        All curriculum guides, visual diagrams, and code snippets are licensed under the permissive <strong>MIT License</strong>.
+      </p>
+
+      <h3>2. Production Database Disclaimer ("As-Is")</h3>
+      <p>
+        All queries and relational constraints are provided for educational purposes without warranties of any kind. 
+        Before executing DDL (<code>DROP</code>, <code>TRUNCATE</code>, <code>ALTER</code>) or DML (<code>UPDATE</code>, <code>DELETE</code>) 
+        on production systems, always test within a development sandbox and maintain verified backups.
+      </p>
+
+      <h3>3. Acceptable Use</h3>
+      <p>
+        Users agree not to launch automated denial-of-service attempts, malicious script injection, or abusive scraping against the platform.
+      </p>
+
+      <h3>4. Authorship & Attribution</h3>
+      <p>
+        Created and maintained by <strong>Sudhanwa (@sudhanwa755)</strong>. Downstream forks and classroom syllabus distributions 
+        must preserve original copyright notices.
+      </p>
+    `;
+  } else if (activeTab === 'cookies') {
+    title = 'Cookie & Storage Preferences';
+    const currentConsent = localStorage.getItem('sql_cookie_consent') || 'none';
+    const badgeText = currentConsent === 'all' ? 'Analytics + Functional Storage (Accepted)' : (currentConsent === 'essential' ? 'Essential Storage Only' : 'No Consent Recorded');
+    const badgeColor = currentConsent === 'all' ? 'var(--accent-emerald)' : 'var(--accent-gold)';
+
+    bodyHtml = `
+      <h3>Current Setting</h3>
+      <p>
+        <span style="display:inline-block; padding:4px 12px; border-radius:999px; background:var(--glass-pill); border:1px solid var(--glass-border); color:${badgeColor}; font-weight:700; font-size:13px;">
+          ${badgeText}
+        </span>
+      </p>
+
+      <h3>Manage Your Choice</h3>
+      <p>
+        We do not use advertising cookies. We only use local storage for your theme preferences and chapter assessment scores, 
+        plus optional anonymous privacy-respecting pageview metrics.
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:12px; margin:20px 0;">
+        <button class="cta-primary-btn" style="justify-content:center; padding:10px 20px; font-size:14px;" onclick="modalSaveConsent('all')">
+          ✓ Accept All (Analytics & Local Storage)
+        </button>
+        <button class="cta-secondary-btn" style="justify-content:center; padding:10px 20px; font-size:14px;" onclick="modalSaveConsent('essential')">
+          Essential Storage Only (Theme & Quizzes)
+        </button>
+      </div>
+      <div id="modalConsentAlert" style="font-size:13px; color:var(--accent-green); display:none; padding:8px 12px; background:var(--glass-pill); border-radius:8px;"></div>
+    `;
+  }
+
+  overlay.innerHTML = `
+    <div class="spatial-modal-dialog" onclick="event.stopPropagation()">
+      <div class="spatial-modal-header">
+        <div class="spatial-modal-title-wrap">
+          <div class="spatial-modal-icon-orb">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h2 class="spatial-modal-title">${title}</h2>
+        </div>
+        <button class="spatial-modal-close-btn" onclick="closeLegalModal()" aria-label="Close dialog">✕</button>
+      </div>
+
+      <div class="spatial-modal-tabs">
+        ${tabButtons}
+      </div>
+
+      <div class="spatial-modal-body">
+        ${bodyHtml}
+      </div>
+
+      <div class="spatial-modal-footer">
+        <span style="font-size:12.5px; color:var(--text-muted);">
+          The SQL Handbook · Open Source MIT
+        </span>
+        <button class="btn btn-secondary" style="min-height:36px; padding:6px 18px; font-size:13px;" onclick="closeLegalModal()">
+          Close
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Modal Storage Helpers
+window.modalInspectStorage = function() {
+  const el = document.getElementById('modalStorageStatus');
+  if (!el) return;
+  const keys = Object.keys(localStorage);
+  if (!keys.length) {
+    el.style.display = 'block';
+    el.textContent = 'No keys currently stored in localStorage.';
+    return;
+  }
+  el.style.display = 'block';
+  el.innerHTML = '<strong>Stored Keys (' + keys.length + '):</strong> ' + keys.map(k => `<code>${k}</code>`).join(', ');
+};
+
+window.modalWipeStorage = function() {
+  if (confirm('Clear all stored theme preferences, quiz answers, and consent cookies?')) {
+    localStorage.clear();
+    const el = document.getElementById('modalStorageStatus');
+    if (el) {
+      el.style.display = 'block';
+      el.textContent = '✓ All local storage items have been wiped.';
+    }
+  }
+};
+
+window.modalSaveConsent = function(level) {
+  localStorage.setItem('sql_cookie_consent', level);
+  const banner = document.getElementById('cookieConsentBar');
+  if (banner) banner.style.display = 'none';
+  if (level === 'all') Analytics.init();
+  const el = document.getElementById('modalConsentAlert');
+  if (el) {
+    el.style.display = 'block';
+    el.textContent = '✓ Preferences saved: ' + (level === 'all' ? 'All Accepted' : 'Essential Only');
+  }
+  setTimeout(() => {
+    renderModalContent('cookies');
+  }, 600);
+};
+
+window.openLegalModal = openLegalModal;
+window.closeLegalModal = closeLegalModal;
+
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
+  enforceHTTPS();
   setupSpatialAtmosphere();
   setupMacCodeWindows();
   setupSpatialSpotlight();
@@ -741,5 +1235,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setupViewToggle();
   setupResponsiveTables();
   setupTableScrollHints();
+  setupCookieConsent();
+  setupInteractiveForms();
+  setupMasterFooter();
 });
+
 

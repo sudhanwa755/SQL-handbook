@@ -3,8 +3,40 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Subqueries (Scalar, Multi-row, Correlated, EXISTS) — HSQLDB Handbook</title>
-<meta name="description" content="Master all SQL subquery types: Scalar, Multi-row, Correlated, Uncorrelated, IN, ANY, ALL, EXISTS, NOT EXISTS. Subqueries in SELECT, FROM, and WHERE with full examples." />
+<title>Subqueries, Correlated Queries & Set Operations — The SQL Handbook</title>
+<meta name="description" content="Master single-row, multi-row, and correlated subqueries, EXISTS vs IN performance, and relational set operations (UNION, INTERSECT, EXCEPT)." />
+<meta name="author" content="Sudhanwa" />
+<meta name="theme-color" content="#07090e" />
+<link rel="canonical" href="https://sudhanwa755.github.io/SQL-handbook/part8-subqueries-sets.html" />
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="apple-touch-icon" href="favicon.svg" />
+
+<!-- Preconnect Hints for Speed -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="dns-prefetch" href="https://unpkg.com" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://sudhanwa755.github.io/SQL-handbook/part8-subqueries-sets.html" />
+<meta property="og:title" content="Subqueries, Correlated Queries & Set Operations — The SQL Handbook" />
+<meta property="og:description" content="Master single-row, multi-row, and correlated subqueries, EXISTS vs IN performance, and relational set operations (UNION, INTERSECT, EXCEPT)." />
+<meta property="og:image" content="assets/og-preview.png" />
+<meta property="og:image:alt" content="The SQL Handbook Chapter Preview" />
+<meta property="og:site_name" content="The SQL Handbook" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content="https://sudhanwa755.github.io/SQL-handbook/part8-subqueries-sets.html" />
+<meta name="twitter:title" content="Subqueries, Correlated Queries & Set Operations — The SQL Handbook" />
+<meta name="twitter:description" content="Master single-row, multi-row, and correlated subqueries, EXISTS vs IN performance, and relational set operations (UNION, INTERSECT, EXCEPT)." />
+<meta name="twitter:image" content="assets/og-preview.png" />
+
+<!-- Content Security Policy Upgrade -->
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -853,7 +885,7 @@ Final result: Alice, Carol, Eva, Frank</span></code></pre>
 
   
   <!-- CHAPTER QUIZ MOUNT -->
-  <div id="chapter-quiz-mount" data-chapter="part8"></div>
+  <div id="chapterQuizSection" class="chapter-quiz-anchor-target"><div id="chapter-quiz-mount" data-chapter="part8"></div></div>
 
   </div><!-- /content-area -->
 
