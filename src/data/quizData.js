@@ -7,7 +7,7 @@
 // Includes complete rationale for why answers are correct and why alternatives are wrong.
 // ==========================================================================
 
-const QUIZ_DATA = {
+export const QUIZ_DATA = {
   "part1": {
     "title": "Chapter 1 Mastery Quiz: Normalization (1NF – 3NF)",
     "subtitle": "Test your understanding of relational database normalization, anomalies, and schema design.",
