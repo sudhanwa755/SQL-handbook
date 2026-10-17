@@ -248,6 +248,9 @@ export default function App() {
             <ProjectHero
               onStartLearning={() => handleOpenChapter('part1')}
               onExploreCurriculum={() => handleSelectNav('home')}
+              onOpenChapter={handleOpenChapter}
+              onOpenQuiz={handleOpenQuiz}
+              onSelectMatrix={() => handleSelectNav('matrix')}
             />
           )}
 
